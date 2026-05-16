@@ -1,10 +1,8 @@
 package ru.quilikasa.playlistmaker
 
+import android.content.Intent
 import android.os.Bundle
-import android.view.View
 import android.widget.Button
-import android.widget.ImageView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 
 class MainActivity : AppCompatActivity() {
@@ -17,19 +15,19 @@ class MainActivity : AppCompatActivity() {
         val btnLibrary = findViewById<Button>(R.id.btn_library)
         val btnSettings = findViewById<Button>(R.id.btn_settings)
 
-        val clickListener: View.OnClickListener = object : View.OnClickListener {
-            override fun onClick(v: View?) {
-                Toast.makeText(this@MainActivity, "Нажали на кнопку Поиск!", Toast.LENGTH_SHORT).show()
-            }
+        btnSearch.setOnClickListener {
+            val intent = Intent(this, SearchActivity::class.java)
+            startActivity(intent)
         }
-        btnSearch.setOnClickListener(clickListener)
 
         btnLibrary.setOnClickListener {
-            Toast.makeText(this@MainActivity, "Нажали на кнопку Медиатека!", Toast.LENGTH_SHORT).show()
+            val intent = Intent(this, LibraryActivity::class.java)
+            startActivity(intent)
         }
 
         btnSettings.setOnClickListener {
-            Toast.makeText(this@MainActivity, "Нажали на кнопку Настройки!", Toast.LENGTH_SHORT).show()
+            val intent = Intent(this, SettingsActivity::class.java)
+            startActivity(intent)
         }
     }
 }
