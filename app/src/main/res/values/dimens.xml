@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="padding_horizontal">16dp</dimen>
+    <dimen name="top_bar_margin_bottom">24dp</dimen>
+
+    <dimen name="big_text_size">22sp</dimen>
+    <dimen name="main_icon_padding">8dp</dimen>
+    <dimen name="main_corner_radius">16dp</dimen>
+
+    <dimen name="settings_padding_vertical">21dp</dimen>
+    <dimen name="med_text_size">16sp</dimen>
+</resources>
