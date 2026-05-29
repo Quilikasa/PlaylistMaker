@@ -34,7 +34,7 @@
                 android:id="@+id/btn_search"
                 android:layout_marginBottom="8dp"
                 android:text="@string/search"
-                app:icon="@drawable/ic_search"
+                app:icon="@drawable/ic_search_24"
                 style="@style/MainButtonStyle"/>
 
             <Button
