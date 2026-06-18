@@ -15,24 +15,16 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:paddingBottom="16dp"
+            android:paddingVertical="16dp"
             android:layout_marginBottom="@dimen/top_bar_margin_bottom">
 
             <ImageView
                 android:id="@+id/btn_back"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:src="@drawable/ic_arrrow_back" />
+                style="@style/TopBarIconBack" />
 
             <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="24dp"
-                android:layout_marginTop="12dp"
-                android:text="@string/settings"
-                android:textSize="@dimen/big_text_size"
-                android:textColor="@color/text_black"/>
+                style="@style/TopBarText"
+                android:text="@string/settings" />
         </LinearLayout>
 
         <FrameLayout
@@ -42,12 +34,8 @@
             android:paddingVertical="@dimen/settings_padding_vertical">
 
             <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
                 android:text="@string/dark_theme"
-                android:layout_gravity="start"
-                android:textSize="@dimen/med_text_size"
-                android:textColor="@color/black" />
+                style="@style/SettingsMenuText" />
 
             <Switch
                 android:layout_width="wrap_content"
@@ -56,65 +44,50 @@
         </FrameLayout>
 
         <FrameLayout
+            android:id="@+id/btn_share"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingVertical="@dimen/settings_padding_vertical">
 
             <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
                 android:text="@string/share"
-                android:layout_gravity="start"
-                android:textSize="@dimen/med_text_size"
-                android:textColor="@color/black" />
+                style="@style/SettingsMenuText" />
 
             <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                style="@style/SettingsMenuIcon"
                 android:src="@drawable/ic_share"
-                android:layout_gravity="end"
                 android:layout_marginRight="4dp"/>
         </FrameLayout>
 
         <FrameLayout
+            android:id="@+id/btn_support"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingVertical="@dimen/settings_padding_vertical">
 
             <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
                 android:text="@string/support"
-                android:layout_gravity="start"
-                android:textSize="@dimen/med_text_size"
-                android:textColor="@color/black" />
+                style="@style/SettingsMenuText" />
 
             <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                style="@style/SettingsMenuIcon"
                 android:src="@drawable/ic_support"
-                android:layout_gravity="end"
                 android:layout_marginRight="4dp"/>
         </FrameLayout>
 
         <FrameLayout
+            android:id="@+id/btn_eula"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingVertical="@dimen/settings_padding_vertical">
 
             <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
                 android:text="@string/eula"
-                android:layout_gravity="start"
-                android:textSize="@dimen/med_text_size"
-                android:textColor="@color/black" />
+                style="@style/SettingsMenuText" />
 
             <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                style="@style/SettingsMenuIcon"
                 android:src="@drawable/ic_arrow_forward"
-                android:layout_gravity="end"
                 android:layout_marginRight="8dp"/>
         </FrameLayout>
     </LinearLayout>
