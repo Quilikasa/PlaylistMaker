@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:paddingVertical="8dp">
+
+    <ImageView
+        android:id="@+id/track_image"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:layout_marginRight="8dp"
+        android:layout_weight="0" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_gravity="center_vertical"
+        android:layout_weight="1">
+
+        <TextView
+            android:id="@+id/track_title"
+            style="@style/TrackListItemText"
+            android:textColor="?attr/colorPrimary"
+            android:textSize="@dimen/med_text_size"
+            tools:text="Название песни" />
+
+        <TextView
+            android:id="@+id/track_description"
+            style="@style/TrackListItemText"
+            android:textColor="?attr/colorOnPrimary"
+            android:textSize="@dimen/small_text_size"
+            tools:text="Исполнитель · 0:00" />
+    </LinearLayout>
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_arrow_forward"
+        android:layout_gravity="center_vertical"
+        android:layout_weight="0"
+        app:tint="?attr/colorOnPrimary" />
+</LinearLayout>
