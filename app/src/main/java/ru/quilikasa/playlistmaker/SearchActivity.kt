@@ -69,7 +69,7 @@ class SearchActivity : AppCompatActivity() {
     }
 
     private fun getMockTracks() : List<Track> {
-        val tracks = arrayListOf<Track>()
+        val tracks = mutableListOf<Track>()
         tracks.add(Track(
             trackName = "Smells Like Teen Spirit",
             artistName = "Nirvana",
