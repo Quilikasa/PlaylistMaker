@@ -3,7 +3,9 @@ package ru.quilikasa.playlistmaker
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 
-class TrackAdapter(private val tracks: List<Track>) : RecyclerView.Adapter<TrackViewHolder>() {
+class TrackAdapter() : RecyclerView.Adapter<TrackViewHolder>() {
+
+    private var tracks = listOf<Track>()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TrackViewHolder {
         return TrackViewHolder(parent)
@@ -15,5 +17,9 @@ class TrackAdapter(private val tracks: List<Track>) : RecyclerView.Adapter<Track
 
     override fun getItemCount(): Int {
         return tracks.size
+    }
+
+    fun setTracks(tracks: List<Track>) {
+        this.tracks = tracks;
     }
 }
