@@ -24,14 +24,13 @@ import retrofit2.create
 class SearchActivity : AppCompatActivity() {
 
     private var searchText: String = ""
-    private var editText: EditText? = null
-    private var placeholderLayout: ViewGroup? = null
-    private var placeholderImage: ImageView? = null
-    private var placeholderText: TextView? = null
-    private var placeholderButton: Button? = null
-    private var searchList: RecyclerView? = null
 
-    private val tracksAdapter = TrackAdapter()
+    private lateinit var editText: EditText
+    private lateinit var placeholderLayout: ViewGroup
+    private lateinit var placeholderImage: ImageView
+    private lateinit var placeholderText: TextView
+    private lateinit var placeholderButton: Button
+    private lateinit var searchList: RecyclerView
 
     private val retrofit = Retrofit.Builder()
         .baseUrl(ItunesApiService.BASE_URL)
@@ -51,20 +50,23 @@ class SearchActivity : AppCompatActivity() {
         placeholderImage = findViewById(R.id.placeholder_img)
         placeholderText = findViewById(R.id.placeholder_txt)
         placeholderButton = findViewById(R.id.placeholder_btn)
-        searchList = findViewById<RecyclerView>(R.id.recyclerView)
+        searchList = findViewById(R.id.recyclerView)
+
+        val tracksAdapter = TrackAdapter()
+        searchList.adapter = tracksAdapter
 
         btnBack.setOnClickListener {
             finish()
         }
 
         btnClear.setOnClickListener {
-            editText?.setText("")
+            editText.setText("")
             tracksAdapter.setTracks(listOf())
             tracksAdapter.notifyDataSetChanged()
-            placeholderLayout?.visibility = View.GONE
+            placeholderLayout.visibility = View.GONE
 
             val inputMethodManager = getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
-            inputMethodManager?.hideSoftInputFromWindow(editText?.windowToken, 0)
+            inputMethodManager?.hideSoftInputFromWindow(editText.windowToken, 0)
         }
 
         val textWatcher = object : TextWatcher {
@@ -82,53 +84,57 @@ class SearchActivity : AppCompatActivity() {
             }
         }
 
-        editText?.addTextChangedListener(textWatcher)
+        editText.addTextChangedListener(textWatcher)
 
-        editText?.setOnEditorActionListener { _, actionId, _ ->
+        val retrofitCallback = object : Callback<SearchResult>{
+            override fun onResponse(
+                call: Call<SearchResult?>,
+                response: Response<SearchResult?>
+            ) {
+                if (response.code() == 200) {
+                    if (response.body()?.results?.isNotEmpty() == true) {
+                        placeholderLayout.visibility = View.GONE
+                        searchList.visibility = View.VISIBLE
+
+                        tracksAdapter.setTracks(response.body()?.results!!)
+                        tracksAdapter.notifyDataSetChanged()
+                    }
+                    if (response.body()?.results!!.isEmpty()) {
+                        showPlaceholder(false)
+                    }
+                } else {
+                    showPlaceholder(true)
+                }
+            }
+
+            override fun onFailure(call: Call<SearchResult?>, t: Throwable) {
+                showPlaceholder(true)
+            }
+        }
+
+        editText.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_DONE) {
-                itunesApiService.searchSongs(searchText).enqueue(object  : Callback<SearchResult>{
-                    override fun onResponse(
-                        call: Call<SearchResult?>,
-                        response: Response<SearchResult?>
-                    ) {
-                        if (response.code() == 200) {
-                            if (response.body()?.results?.isNotEmpty() == true) {
-                                placeholderLayout?.visibility = View.GONE
-                                searchList?.visibility = View.VISIBLE
-
-                                tracksAdapter.setTracks(response.body()?.results!!)
-                                tracksAdapter.notifyDataSetChanged()
-                            }
-                            if (response.body()?.results!!.isEmpty()) {
-                                showPlaceholder(false)
-                            }
-                        } else {
-                            showPlaceholder(true)
-                        }
-                    }
-
-                    override fun onFailure(call: Call<SearchResult?>, t: Throwable) {
-                        showPlaceholder(true)
-                    }
-                })
+                itunesApiService.searchSongs(searchText).enqueue(retrofitCallback)
             }
             false
         }
 
-        searchList?.adapter = tracksAdapter
+        placeholderButton.setOnClickListener {
+            itunesApiService.searchSongs(searchText).enqueue(retrofitCallback)
+        }
     }
 
     private fun showPlaceholder(isFailure: Boolean) {
-        placeholderLayout?.visibility = View.VISIBLE
-        searchList?.visibility = View.GONE
+        placeholderLayout.visibility = View.VISIBLE
+        searchList.visibility = View.GONE
         if(isFailure) {
-            placeholderImage?.setImageResource(R.drawable.ic_search_failure)
-            placeholderText?.text = getString(R.string.search_failure)
-            placeholderButton?.visibility = View.VISIBLE
+            placeholderImage.setImageResource(R.drawable.ic_search_failure)
+            placeholderText.text = getString(R.string.search_failure)
+            placeholderButton.visibility = View.VISIBLE
         } else {
-            placeholderImage?.setImageResource(R.drawable.ic_search_empty)
-            placeholderText?.text = getString(R.string.search_empty_result)
-            placeholderButton?.visibility = View.GONE
+            placeholderImage.setImageResource(R.drawable.ic_search_empty)
+            placeholderText.text = getString(R.string.search_empty_result)
+            placeholderButton.visibility = View.GONE
         }
     }
 
@@ -140,7 +146,7 @@ class SearchActivity : AppCompatActivity() {
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
         super.onRestoreInstanceState(savedInstanceState)
         searchText = savedInstanceState.getString(KEY).toString()
-        editText?.setText(searchText)
+        editText.setText(searchText)
     }
 
     companion object {
