@@ -13,4 +13,8 @@
     <string name="support_text">Спасибо разработчикам и разработчицам за крутое приложение!</string>
     <string name="eula">Пользовательское соглашение</string>
     <string name="eula_link">https://yandex.ru/legal/practicum_offer/</string>
+
+    <string name="search_empty_result">Ничего не нашлось</string>
+    <string name="search_failure">Проблемы со связью \n\n Загрузка не удалась. Проверьте подключение к интернету</string>
+    <string name="update">Обновить</string>
 </resources>
