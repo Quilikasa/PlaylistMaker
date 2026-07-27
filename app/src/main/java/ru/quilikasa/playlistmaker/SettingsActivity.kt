@@ -6,6 +6,9 @@ import android.widget.FrameLayout
 import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.net.toUri
+import com.google.android.material.switchmaterial.SwitchMaterial
+import ru.quilikasa.playlistmaker.App.Companion.PLAYLIST_PREFERENCES
+import ru.quilikasa.playlistmaker.App.Companion.THEME_PREFERENCE_KEY
 
 class SettingsActivity : AppCompatActivity() {
 
@@ -16,6 +19,16 @@ class SettingsActivity : AppCompatActivity() {
         val btnBack = findViewById<ImageView>(R.id.btn_back)
         btnBack.setOnClickListener {
             finish()
+        }
+
+        val themeSwitcher = findViewById<SwitchMaterial>(R.id.themeSwitcher)
+
+        val sharedPrefs = getSharedPreferences(PLAYLIST_PREFERENCES, MODE_PRIVATE)
+        val darkTheme = sharedPrefs.getBoolean(THEME_PREFERENCE_KEY, false)
+        themeSwitcher.isChecked = darkTheme
+
+        themeSwitcher.setOnCheckedChangeListener { switcher, checked ->
+            (applicationContext as App).switchTheme(checked)
         }
 
         val btnShare = findViewById<FrameLayout>(R.id.btn_share)

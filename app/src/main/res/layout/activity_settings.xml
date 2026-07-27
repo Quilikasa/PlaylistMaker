@@ -29,15 +29,15 @@
 
         <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            tools:ignore="UseSwitchCompatOrMaterialXml"
-            android:paddingVertical="@dimen/settings_padding_vertical">
+            android:layout_height="wrap_content">
 
             <TextView
                 android:text="@string/dark_theme"
+                android:layout_gravity="center_vertical"
                 style="@style/SettingsMenuText" />
 
-            <Switch
+            <com.google.android.material.switchmaterial.SwitchMaterial
+                android:id="@+id/themeSwitcher"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="end"/>
