@@ -1,6 +1,5 @@
 package ru.quilikasa.playlistmaker
 
-import android.content.Context
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -20,6 +19,7 @@ import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.create
+import ru.quilikasa.playlistmaker.App.Companion.PLAYLIST_PREFERENCES
 
 class SearchActivity : AppCompatActivity() {
 
@@ -31,6 +31,10 @@ class SearchActivity : AppCompatActivity() {
     private lateinit var placeholderText: TextView
     private lateinit var placeholderButton: Button
     private lateinit var searchList: RecyclerView
+    private lateinit var historyLayout: ViewGroup
+    private lateinit var searchHistoryList: RecyclerView
+
+    private lateinit var historyStorage: SearchHistoryStorage
 
     private val retrofit = Retrofit.Builder()
         .baseUrl(ItunesApiService.BASE_URL)
@@ -51,9 +55,28 @@ class SearchActivity : AppCompatActivity() {
         placeholderText = findViewById(R.id.placeholder_txt)
         placeholderButton = findViewById(R.id.placeholder_btn)
         searchList = findViewById(R.id.recyclerView)
+        historyLayout = findViewById(R.id.history)
+        searchHistoryList = findViewById(R.id.historyRecyclerView)
 
-        val tracksAdapter = TrackAdapter()
+        historyStorage = SearchHistoryStorage(
+            getSharedPreferences(PLAYLIST_PREFERENCES, MODE_PRIVATE))
+
+        val tracksAdapter = TrackAdapter(
+            onItemClick = { track ->  historyStorage.addTrack(track) }
+        )
         searchList.adapter = tracksAdapter
+
+        val historyAdapter = TrackAdapter(
+            onItemClick = {  }
+        )
+        searchHistoryList.adapter = historyAdapter
+        val historyTracks = historyStorage.getTracks()
+        if (historyTracks.size > 0) {
+            historyAdapter.setTracks(historyTracks)
+            historyAdapter.notifyDataSetChanged()
+            historyLayout.visibility = View.VISIBLE
+            searchList.visibility = View.GONE
+        }
 
         btnBack.setOnClickListener {
             finish()
@@ -64,8 +87,10 @@ class SearchActivity : AppCompatActivity() {
             tracksAdapter.setTracks(listOf())
             tracksAdapter.notifyDataSetChanged()
             placeholderLayout.visibility = View.GONE
+            historyLayout.visibility = View.VISIBLE
+            searchList.visibility = View.GONE
 
-            val inputMethodManager = getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
+            val inputMethodManager = getSystemService(INPUT_METHOD_SERVICE) as? InputMethodManager
             inputMethodManager?.hideSoftInputFromWindow(editText.windowToken, 0)
         }
 
@@ -94,6 +119,7 @@ class SearchActivity : AppCompatActivity() {
                 if (response.code() == 200) {
                     if (response.body()?.results?.isNotEmpty() == true) {
                         placeholderLayout.visibility = View.GONE
+                        historyLayout.visibility = View.GONE
                         searchList.visibility = View.VISIBLE
 
                         tracksAdapter.setTracks(response.body()?.results!!)
@@ -126,6 +152,7 @@ class SearchActivity : AppCompatActivity() {
 
     private fun showPlaceholder(isFailure: Boolean) {
         placeholderLayout.visibility = View.VISIBLE
+        historyLayout.visibility = View.GONE
         searchList.visibility = View.GONE
         if(isFailure) {
             placeholderImage.setImageResource(R.drawable.ic_search_failure)
