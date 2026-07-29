@@ -33,6 +33,8 @@ class SearchActivity : AppCompatActivity() {
     private lateinit var searchList: RecyclerView
     private lateinit var historyLayout: ViewGroup
     private lateinit var searchHistoryList: RecyclerView
+    private lateinit var historyClearButton: Button
+
 
     private lateinit var historyStorage: SearchHistoryStorage
 
@@ -57,6 +59,7 @@ class SearchActivity : AppCompatActivity() {
         searchList = findViewById(R.id.recyclerView)
         historyLayout = findViewById(R.id.history)
         searchHistoryList = findViewById(R.id.historyRecyclerView)
+        historyClearButton = findViewById(R.id.history_clear_btn)
 
         historyStorage = SearchHistoryStorage(
             getSharedPreferences(PLAYLIST_PREFERENCES, MODE_PRIVATE))
@@ -76,6 +79,12 @@ class SearchActivity : AppCompatActivity() {
             historyAdapter.notifyDataSetChanged()
             historyLayout.visibility = View.VISIBLE
             searchList.visibility = View.GONE
+        }
+
+        historyClearButton.setOnClickListener {
+            historyStorage.clearTracks()
+            historyAdapter.setTracks(historyStorage.getTracks())
+            historyAdapter.notifyDataSetChanged()
         }
 
         btnBack.setOnClickListener {

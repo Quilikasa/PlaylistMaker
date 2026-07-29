@@ -11,22 +11,35 @@ class SearchHistoryStorage(private val prefs: SharedPreferences) {
     private val type = object : TypeToken<List<Track>>() {}.type
 
     fun addTrack(newTrack: Track) {
-        //TODO проверка на повтор и кол-во
-        //где сделать сортировку?
-
         var historyJson = prefs.getString(HISTORY_PREFERENCE_KEY, "")
-        val tracks: MutableList<Track> = gson.fromJson(historyJson, type)
+        var tracks: MutableList<Track>
+        if (historyJson?.length == 0) {
+            tracks = mutableListOf()
+        } else {
+            tracks = gson.fromJson(historyJson, type)
+        }
+
+        if(tracks.contains(newTrack)) {
+            tracks.remove(newTrack)
+        }
         tracks.add(newTrack)
+        if(tracks.size > 10) {
+            tracks.removeAt(0)
+        }
+
         historyJson = gson.toJson(tracks, type)
         prefs.edit().putString(HISTORY_PREFERENCE_KEY, historyJson).apply()
     }
 
     fun getTracks(): List<Track> {
         val historyJson = prefs.getString(HISTORY_PREFERENCE_KEY, "")
-        return gson.fromJson(historyJson, type)
+        if (historyJson?.length == 0) return listOf()
+        val tracks: MutableList<Track> = gson.fromJson(historyJson, type)
+        tracks.reverse()
+        return tracks
     }
 
     fun clearTracks() {
-        prefs.edit().remove(HISTORY_PREFERENCE_KEY).apply()
+        prefs.edit().putString(HISTORY_PREFERENCE_KEY, "").apply()
     }
 }
