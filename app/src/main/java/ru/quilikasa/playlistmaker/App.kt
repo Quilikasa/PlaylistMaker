@@ -10,7 +10,6 @@ class App : Application() {
 
         val sharedPrefs = getSharedPreferences(PLAYLIST_PREFERENCES, MODE_PRIVATE)
         val darkTheme = sharedPrefs.getBoolean(THEME_PREFERENCE_KEY, false)
-
         switchTheme(darkTheme)
     }
 
@@ -31,6 +30,5 @@ class App : Application() {
         const val PLAYLIST_PREFERENCES = "playlistmaker_preferences"
         const val THEME_PREFERENCE_KEY = "theme_preference_key"
         const val HISTORY_PREFERENCE_KEY = "history_preference_key"
-
     }
 }
