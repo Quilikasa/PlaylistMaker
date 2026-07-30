@@ -3,7 +3,7 @@ package ru.quilikasa.playlistmaker
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 
-class TrackAdapter() : RecyclerView.Adapter<TrackViewHolder>() {
+class TrackAdapter(private val onItemClick: (Track) -> Unit,) : RecyclerView.Adapter<TrackViewHolder>() {
 
     private var tracks = listOf<Track>()
 
@@ -13,6 +13,9 @@ class TrackAdapter() : RecyclerView.Adapter<TrackViewHolder>() {
 
     override fun onBindViewHolder(holder: TrackViewHolder, position: Int) {
         holder.bind(tracks[position])
+        holder.itemView.setOnClickListener {
+            onItemClick(tracks[position])
+        }
     }
 
     override fun getItemCount(): Int {
