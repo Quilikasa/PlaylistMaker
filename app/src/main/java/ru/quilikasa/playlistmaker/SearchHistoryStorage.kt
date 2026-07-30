@@ -5,9 +5,7 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import ru.quilikasa.playlistmaker.App.Companion.HISTORY_PREFERENCE_KEY
 
-class SearchHistoryStorage(private val prefs: SharedPreferences) {
-
-    private val gson = Gson()
+class SearchHistoryStorage(private val prefs: SharedPreferences, private val gson: Gson) {
     private val type = object : TypeToken<List<Track>>() {}.type
 
     fun addTrack(newTrack: Track) {
@@ -23,7 +21,7 @@ class SearchHistoryStorage(private val prefs: SharedPreferences) {
             tracks.remove(newTrack)
         }
         tracks.add(newTrack)
-        if(tracks.size > 10) {
+        if(tracks.size > MAX_HISTORY_SIZE) {
             tracks.removeAt(0)
         }
 
@@ -41,5 +39,9 @@ class SearchHistoryStorage(private val prefs: SharedPreferences) {
 
     fun clearTracks() {
         prefs.edit().putString(HISTORY_PREFERENCE_KEY, "").apply()
+    }
+
+    companion object {
+        private const val MAX_HISTORY_SIZE = 10
     }
 }

@@ -31,7 +31,7 @@
             android:layout_width="match_parent"
             android:layout_height="36dp"
             android:paddingHorizontal="12dp"
-            android:background="@drawable/rounded_background">
+            android:background="@drawable/edit_rounded_background">
 
             <EditText
                 android:id="@+id/edit"
@@ -102,13 +102,8 @@
 
             <Button
                 android:id="@+id/placeholder_btn"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
                 android:text="@string/update"
-                android:layout_marginTop="16dp"
-                tools:visibility="visible"
-                android:textColor="?attr/colorSecondary"
-                android:textAllCaps="false"/>
+                style="@style/ButtonStyle" />
         </LinearLayout>
 
         <LinearLayout
@@ -140,12 +135,8 @@
 
             <Button
                 android:id="@+id/history_clear_btn"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
                 android:text="@string/search_history_clear"
-                android:layout_marginTop="16dp"
-                android:textColor="?attr/colorSecondary"
-                android:textAllCaps="false"/>
+                style="@style/ButtonStyle" />
         </LinearLayout>
     </LinearLayout>
 </FrameLayout>

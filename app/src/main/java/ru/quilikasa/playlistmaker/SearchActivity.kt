@@ -13,6 +13,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
+import com.google.gson.Gson
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -62,7 +63,7 @@ class SearchActivity : AppCompatActivity() {
         val historyClearButton = findViewById<Button>(R.id.history_clear_btn)
 
         historyStorage = SearchHistoryStorage(
-            getSharedPreferences(PLAYLIST_PREFERENCES, MODE_PRIVATE))
+            getSharedPreferences(PLAYLIST_PREFERENCES, MODE_PRIVATE), Gson())
 
         tracksAdapter = TrackAdapter(
             onItemClick = { track ->  historyStorage.addTrack(track) }
