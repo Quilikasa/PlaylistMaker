@@ -69,12 +69,17 @@ class SearchActivity : AppCompatActivity() {
         tracksAdapter = TrackAdapter(
             onItemClick = { track ->
                 historyStorage.addTrack(track)
-                startActivity(Intent(this, AudioplayerActivity::class.java))
+                val intent = Intent(this, AudioplayerActivity::class.java)
+                intent.putExtra(KEY_TRACK_EXTRA, track)
+                startActivity(intent)
             } )
         searchList.adapter = tracksAdapter
 
         historyAdapter = TrackAdapter(
-            onItemClick = { startActivity(Intent(this, AudioplayerActivity::class.java)) }
+            onItemClick = { track ->
+                val intent = Intent(this, AudioplayerActivity::class.java)
+                intent.putExtra(KEY_TRACK_EXTRA, track)
+                startActivity(intent) }
         )
         searchHistoryList.adapter = historyAdapter
         showHistoryList()
@@ -213,5 +218,6 @@ class SearchActivity : AppCompatActivity() {
 
     companion object {
         private const val KEY_EDIT_TEXT = "EditText"
+        const val KEY_TRACK_EXTRA = "TrackExtra"
     }
 }
