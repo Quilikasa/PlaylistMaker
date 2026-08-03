@@ -1,5 +1,6 @@
 package ru.quilikasa.playlistmaker
 
+import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -66,12 +67,14 @@ class SearchActivity : AppCompatActivity() {
             getSharedPreferences(PLAYLIST_PREFERENCES, MODE_PRIVATE), Gson())
 
         tracksAdapter = TrackAdapter(
-            onItemClick = { track ->  historyStorage.addTrack(track) }
-        )
+            onItemClick = { track ->
+                historyStorage.addTrack(track)
+                startActivity(Intent(this, AudioplayerActivity::class.java))
+            } )
         searchList.adapter = tracksAdapter
 
         historyAdapter = TrackAdapter(
-            onItemClick = {  }
+            onItemClick = { startActivity(Intent(this, AudioplayerActivity::class.java)) }
         )
         searchHistoryList.adapter = historyAdapter
         showHistoryList()
