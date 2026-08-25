@@ -6,12 +6,14 @@ import android.os.Handler
 import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
+import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
@@ -33,6 +35,7 @@ class SearchActivity : AppCompatActivity() {
     private lateinit var placeholderImage: ImageView
     private lateinit var placeholderText: TextView
     private lateinit var placeholderButton: Button
+    private lateinit var progress: ProgressBar
     private lateinit var searchList: RecyclerView
     private lateinit var historyLayout: ViewGroup
 
@@ -64,6 +67,7 @@ class SearchActivity : AppCompatActivity() {
         placeholderImage = findViewById(R.id.placeholder_img)
         placeholderText = findViewById(R.id.placeholder_txt)
         placeholderButton = findViewById(R.id.placeholder_btn)
+        progress = findViewById(R.id.progress)
         searchList = findViewById(R.id.recyclerView)
         historyLayout = findViewById(R.id.history)
         val searchHistoryList = findViewById<RecyclerView>(R.id.historyRecyclerView)
@@ -118,10 +122,10 @@ class SearchActivity : AppCompatActivity() {
                     showHistoryList()
                     btnClear.visibility = View.GONE
                 } else {
-                    //TODO показать прогресс вместо пустого экрана
                     showEmptyScreen()
                     searchText = s.toString()
                     btnClear.visibility = View.VISIBLE
+                    progress.visibility = View.VISIBLE
                     searchDebounce()
                 }
             }
@@ -186,6 +190,7 @@ class SearchActivity : AppCompatActivity() {
     }
 
     private fun searchRequest() {
+        Log.d("SearchActivity", "Start searchRequest with text = $searchText")
         itunesApiService.searchSongs(searchText).enqueue(retrofitCallback)
     }
 
@@ -193,6 +198,7 @@ class SearchActivity : AppCompatActivity() {
         tracksAdapter.setTracks(tracks)
         tracksAdapter.notifyDataSetChanged()
 
+        progress.visibility = View.GONE
         placeholderLayout.visibility = View.GONE
         historyLayout.visibility = View.GONE
         searchList.visibility = View.VISIBLE
@@ -204,6 +210,7 @@ class SearchActivity : AppCompatActivity() {
             historyAdapter.setTracks(historyTracks)
             historyAdapter.notifyDataSetChanged()
 
+            progress.visibility = View.GONE
             placeholderLayout.visibility = View.GONE
             historyLayout.visibility = View.VISIBLE
             searchList.visibility = View.GONE
@@ -213,6 +220,7 @@ class SearchActivity : AppCompatActivity() {
     }
 
     private fun showPlaceholder(isFailure: Boolean) {
+        progress.visibility = View.GONE
         placeholderLayout.visibility = View.VISIBLE
         historyLayout.visibility = View.GONE
         searchList.visibility = View.GONE
@@ -228,6 +236,7 @@ class SearchActivity : AppCompatActivity() {
     }
 
     private fun showEmptyScreen() {
+        progress.visibility = View.GONE
         placeholderLayout.visibility = View.GONE
         historyLayout.visibility = View.GONE
         searchList.visibility = View.GONE
