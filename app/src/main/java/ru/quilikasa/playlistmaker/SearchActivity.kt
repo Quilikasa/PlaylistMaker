@@ -2,11 +2,12 @@ package ru.quilikasa.playlistmaker
 
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
 import android.view.ViewGroup
-import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.EditText
@@ -40,6 +41,11 @@ class SearchActivity : AppCompatActivity() {
 
     private lateinit var historyStorage: SearchHistoryStorage
 
+    private val handler = Handler(Looper.getMainLooper())
+    private val searchRunnable = Runnable { searchRequest() }
+
+    private var isClickAllowed = true
+
     private val retrofit = Retrofit.Builder()
         .baseUrl(ItunesApiService.BASE_URL)
         .addConverterFactory(GsonConverterFactory.create())
@@ -68,18 +74,19 @@ class SearchActivity : AppCompatActivity() {
 
         tracksAdapter = TrackAdapter(
             onItemClick = { track ->
-                historyStorage.addTrack(track)
-                val intent = Intent(this, AudioplayerActivity::class.java)
-                intent.putExtra(KEY_TRACK_EXTRA, track)
-                startActivity(intent)
+                if (clickDebounce()) {
+                    historyStorage.addTrack(track)
+                    openPlayer(track)
+                }
             } )
         searchList.adapter = tracksAdapter
 
         historyAdapter = TrackAdapter(
             onItemClick = { track ->
-                val intent = Intent(this, AudioplayerActivity::class.java)
-                intent.putExtra(KEY_TRACK_EXTRA, track)
-                startActivity(intent) }
+                if (clickDebounce()) {
+                    openPlayer(track)
+                }
+            }
         )
         searchHistoryList.adapter = historyAdapter
         showHistoryList()
@@ -111,9 +118,11 @@ class SearchActivity : AppCompatActivity() {
                     showHistoryList()
                     btnClear.visibility = View.GONE
                 } else {
+                    //TODO показать прогресс вместо пустого экрана
                     showEmptyScreen()
                     searchText = s.toString()
                     btnClear.visibility = View.VISIBLE
+                    searchDebounce()
                 }
             }
         }
@@ -127,38 +136,57 @@ class SearchActivity : AppCompatActivity() {
             }
         }
 
-        val retrofitCallback = object : Callback<SearchResult>{
-            override fun onResponse(
-                call: Call<SearchResult?>,
-                response: Response<SearchResult?>
-            ) {
-                if (response.code() == 200) {
-                    if (response.body()?.results?.isNotEmpty() == true) {
-                        showSearchList(response.body()?.results!!)
-                    }
-                    if (response.body()?.results!!.isEmpty()) {
-                        showPlaceholder(false)
-                    }
-                } else {
-                    showPlaceholder(true)
-                }
+        placeholderButton.setOnClickListener {
+            if (clickDebounce()) {
+                searchRequest()
             }
+        }
+    }
 
-            override fun onFailure(call: Call<SearchResult?>, t: Throwable) {
+    private fun openPlayer(track: Track) {
+        val intent = Intent(this, AudioplayerActivity::class.java)
+        intent.putExtra(KEY_TRACK_EXTRA, track)
+        startActivity(intent)
+    }
+
+    val retrofitCallback = object : Callback<SearchResult>{
+        override fun onResponse(
+            call: Call<SearchResult?>,
+            response: Response<SearchResult?>
+        ) {
+            if (response.code() == 200) {
+                if (response.body()?.results?.isNotEmpty() == true) {
+                    showSearchList(response.body()?.results!!)
+                }
+                if (response.body()?.results!!.isEmpty()) {
+                    showPlaceholder(false)
+                }
+            } else {
                 showPlaceholder(true)
             }
         }
 
-        editText.setOnEditorActionListener { _, actionId, _ ->
-            if (actionId == EditorInfo.IME_ACTION_DONE) {
-                itunesApiService.searchSongs(searchText).enqueue(retrofitCallback)
-            }
-            false
+        override fun onFailure(call: Call<SearchResult?>, t: Throwable) {
+            showPlaceholder(true)
         }
+    }
 
-        placeholderButton.setOnClickListener {
-            itunesApiService.searchSongs(searchText).enqueue(retrofitCallback)
+    private fun searchDebounce() {
+        handler.removeCallbacks(searchRunnable)
+        handler.postDelayed(searchRunnable, SEARCH_DEBOUNCE_DELAY)
+    }
+
+    private fun clickDebounce() : Boolean {
+        val current = isClickAllowed
+        if (isClickAllowed) {
+            isClickAllowed = false
+            handler.postDelayed({ isClickAllowed = true }, CLICK_DEBOUNCE_DELAY)
         }
+        return current
+    }
+
+    private fun searchRequest() {
+        itunesApiService.searchSongs(searchText).enqueue(retrofitCallback)
     }
 
     private fun showSearchList(tracks: List<Track>) {
@@ -218,6 +246,8 @@ class SearchActivity : AppCompatActivity() {
 
     companion object {
         private const val KEY_EDIT_TEXT = "EditText"
+        private const val SEARCH_DEBOUNCE_DELAY = 2000L
+        private const val CLICK_DEBOUNCE_DELAY = 1000L
         const val KEY_TRACK_EXTRA = "TrackExtra"
     }
 }
