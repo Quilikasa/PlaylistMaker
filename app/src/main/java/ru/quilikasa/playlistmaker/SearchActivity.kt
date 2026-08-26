@@ -45,7 +45,10 @@ class SearchActivity : AppCompatActivity() {
     private lateinit var historyStorage: SearchHistoryStorage
 
     private val handler = Handler(Looper.getMainLooper())
-    private val searchRunnable = Runnable { searchRequest() }
+    private val searchRunnable = Runnable {
+        showProgress()
+        searchRequest()
+    }
 
     private var isClickAllowed = true
 
@@ -125,7 +128,6 @@ class SearchActivity : AppCompatActivity() {
                     showEmptyScreen()
                     searchText = s.toString()
                     btnClear.visibility = View.VISIBLE
-                    progress.visibility = View.VISIBLE
                     searchDebounce()
                 }
             }
@@ -192,6 +194,13 @@ class SearchActivity : AppCompatActivity() {
     private fun searchRequest() {
         Log.d("SearchActivity", "Start searchRequest with text = $searchText")
         itunesApiService.searchSongs(searchText).enqueue(retrofitCallback)
+    }
+
+    private fun showProgress() {
+        progress.visibility = View.VISIBLE
+        placeholderLayout.visibility = View.GONE
+        historyLayout.visibility = View.GONE
+        searchList.visibility = View.GONE
     }
 
     private fun showSearchList(tracks: List<Track>) {
