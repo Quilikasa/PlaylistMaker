@@ -1,4 +1,4 @@
-package ru.quilikasa.playlistmaker
+package ru.quilikasa.playlistmaker.presentation.settings
 
 import android.content.Intent
 import android.os.Bundle
@@ -7,8 +7,10 @@ import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.net.toUri
 import com.google.android.material.switchmaterial.SwitchMaterial
+import ru.quilikasa.playlistmaker.App
 import ru.quilikasa.playlistmaker.App.Companion.PLAYLIST_PREFERENCES
 import ru.quilikasa.playlistmaker.App.Companion.THEME_PREFERENCE_KEY
+import ru.quilikasa.playlistmaker.R
 
 class SettingsActivity : AppCompatActivity() {
 

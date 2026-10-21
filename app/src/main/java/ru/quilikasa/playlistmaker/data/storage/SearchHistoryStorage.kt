@@ -1,9 +1,10 @@
-package ru.quilikasa.playlistmaker
+package ru.quilikasa.playlistmaker.data.storage
 
 import android.content.SharedPreferences
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import ru.quilikasa.playlistmaker.App.Companion.HISTORY_PREFERENCE_KEY
+import ru.quilikasa.playlistmaker.domain.models.Track
 
 class SearchHistoryStorage(private val prefs: SharedPreferences, private val gson: Gson) {
     private val type = object : TypeToken<List<Track>>() {}.type

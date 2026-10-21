@@ -1,9 +1,13 @@
-package ru.quilikasa.playlistmaker
+package ru.quilikasa.playlistmaker.presentation.main
 
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
+import ru.quilikasa.playlistmaker.presentation.library.LibraryActivity
+import ru.quilikasa.playlistmaker.R
+import ru.quilikasa.playlistmaker.presentation.settings.SettingsActivity
+import ru.quilikasa.playlistmaker.presentation.search.SearchActivity
 
 class MainActivity : AppCompatActivity() {
 

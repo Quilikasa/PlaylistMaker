@@ -1,4 +1,4 @@
-package ru.quilikasa.playlistmaker
+package ru.quilikasa.playlistmaker.presentation.search
 
 import android.content.Intent
 import android.os.Bundle
@@ -27,6 +27,12 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.create
 import ru.quilikasa.playlistmaker.App.Companion.PLAYLIST_PREFERENCES
+import ru.quilikasa.playlistmaker.presentation.player.AudioplayerActivity
+import ru.quilikasa.playlistmaker.R
+import ru.quilikasa.playlistmaker.data.storage.SearchHistoryStorage
+import ru.quilikasa.playlistmaker.data.dto.SearchSongsResponse
+import ru.quilikasa.playlistmaker.data.network.ItunesApiService
+import ru.quilikasa.playlistmaker.domain.models.Track
 
 class SearchActivity : AppCompatActivity() {
 
@@ -86,7 +92,8 @@ class SearchActivity : AppCompatActivity() {
         val historyClearButton = findViewById<Button>(R.id.history_clear_btn)
 
         historyStorage = SearchHistoryStorage(
-            getSharedPreferences(PLAYLIST_PREFERENCES, MODE_PRIVATE), Gson())
+            getSharedPreferences(PLAYLIST_PREFERENCES, MODE_PRIVATE), Gson()
+        )
 
         tracksAdapter = TrackAdapter(
             onItemClick = { track ->
@@ -164,10 +171,10 @@ class SearchActivity : AppCompatActivity() {
         startActivity(intent)
     }
 
-    val retrofitCallback = object : Callback<SearchResult>{
+    val retrofitCallback = object : Callback<SearchSongsResponse>{
         override fun onResponse(
-            call: Call<SearchResult?>,
-            response: Response<SearchResult?>
+            call: Call<SearchSongsResponse?>,
+            response: Response<SearchSongsResponse?>
         ) {
             if (response.code() == 200) {
                 if (response.body()?.results?.isNotEmpty() == true) {
@@ -181,7 +188,7 @@ class SearchActivity : AppCompatActivity() {
             }
         }
 
-        override fun onFailure(call: Call<SearchResult?>, t: Throwable) {
+        override fun onFailure(call: Call<SearchSongsResponse?>, t: Throwable) {
             showPlaceholder(true)
         }
     }

@@ -1,4 +1,4 @@
-package ru.quilikasa.playlistmaker
+package ru.quilikasa.playlistmaker.domain.models
 
 import java.io.Serializable
 

@@ -1,7 +1,8 @@
-package ru.quilikasa.playlistmaker
+package ru.quilikasa.playlistmaker.presentation.search
 
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import ru.quilikasa.playlistmaker.domain.models.Track
 
 class TrackAdapter(private val onItemClick: (Track) -> Unit,) : RecyclerView.Adapter<TrackViewHolder>() {
 
