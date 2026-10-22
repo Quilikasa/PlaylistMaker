@@ -18,20 +18,12 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
-import okhttp3.OkHttpClient
-import okhttp3.logging.HttpLoggingInterceptor
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.create
 import ru.quilikasa.playlistmaker.App.Companion.PLAYLIST_PREFERENCES
+import ru.quilikasa.playlistmaker.Creator
 import ru.quilikasa.playlistmaker.presentation.player.AudioplayerActivity
 import ru.quilikasa.playlistmaker.R
 import ru.quilikasa.playlistmaker.data.storage.SearchHistoryStorage
-import ru.quilikasa.playlistmaker.data.dto.SearchSongsResponse
-import ru.quilikasa.playlistmaker.data.network.ItunesApiService
+import ru.quilikasa.playlistmaker.domain.api.SongsInteractor
 import ru.quilikasa.playlistmaker.domain.models.Track
 
 class SearchActivity : AppCompatActivity() {
@@ -49,6 +41,8 @@ class SearchActivity : AppCompatActivity() {
 
     private lateinit var tracksAdapter: TrackAdapter
     private lateinit var historyAdapter: TrackAdapter
+
+    private val interactor: SongsInteractor = Creator.provideSongsInteractor()
 
     private lateinit var historyStorage: SearchHistoryStorage
 
@@ -84,6 +78,7 @@ class SearchActivity : AppCompatActivity() {
         tracksAdapter = TrackAdapter(
             onItemClick = { track ->
                 if (clickDebounce()) {
+                    //TODO переделать на интерактор
                     historyStorage.addTrack(track)
                     openPlayer(track)
                 }
@@ -101,6 +96,7 @@ class SearchActivity : AppCompatActivity() {
         showHistoryList()
 
         historyClearButton.setOnClickListener {
+            //TODO переделать на интерактор
             historyStorage.clearTracks()
             showEmptyScreen()
         }
@@ -157,25 +153,14 @@ class SearchActivity : AppCompatActivity() {
         startActivity(intent)
     }
 
-    val retrofitCallback = object : Callback<SearchSongsResponse>{
-        override fun onResponse(
-            call: Call<SearchSongsResponse?>,
-            response: Response<SearchSongsResponse?>
-        ) {
-            if (response.code() == 200) {
-                if (response.body()?.results?.isNotEmpty() == true) {
-                    showSearchList(response.body()?.results!!)
-                }
-                if (response.body()?.results!!.isEmpty()) {
-                    showPlaceholder(false)
-                }
+    val songsConsumer = object : SongsInteractor.SongsConsumer {
+        override fun consume(foundSongs: List<Track>) {
+            if(foundSongs.isEmpty()) {
+                handler.post { showPlaceholder(false) }
             } else {
-                showPlaceholder(true)
+                handler.post { showSearchList(foundSongs) }
             }
-        }
-
-        override fun onFailure(call: Call<SearchSongsResponse?>, t: Throwable) {
-            showPlaceholder(true)
+            //TODO вернуть обработку ошибок позже
         }
     }
 
@@ -195,7 +180,7 @@ class SearchActivity : AppCompatActivity() {
 
     private fun searchRequest() {
         Log.d("SearchActivity", "Start searchRequest with text = $searchText")
-        itunesApiService.searchSongs(searchText).enqueue(retrofitCallback)
+        interactor.searchSongs(searchText, songsConsumer)
     }
 
     private fun showProgress() {
@@ -216,6 +201,7 @@ class SearchActivity : AppCompatActivity() {
     }
 
     private fun showHistoryList() {
+        //TODO переделать на интерактор
         val historyTracks = historyStorage.getTracks()
         if (historyTracks.size > 0) {
             historyAdapter.setTracks(historyTracks)

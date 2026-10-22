@@ -52,7 +52,7 @@ class AudioplayerActivity : AppCompatActivity() {
 
         val imgAlbum = findViewById<ImageView>(R.id.img_album)
         Glide.with(this)
-            .load(track?.getCoverArtwork())
+            .load(track?.artworkUrl500)
             .placeholder(R.drawable.album)
             .centerCrop()
             .transform(RoundedCorners(dpToPx(8.0f, this)))
@@ -134,6 +134,7 @@ class AudioplayerActivity : AppCompatActivity() {
             context.resources.displayMetrics).toInt()
     }
 
+    //TODO перенести в репозиторий
     private fun extractYearFromIsoDate(dateString: String?): String {
         val instant = Instant.parse(dateString)
         return Year.from(instant.atOffset(ZoneOffset.UTC)).value.toString()
