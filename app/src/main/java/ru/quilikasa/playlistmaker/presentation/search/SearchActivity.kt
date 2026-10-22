@@ -60,20 +60,6 @@ class SearchActivity : AppCompatActivity() {
 
     private var isClickAllowed = true
 
-    private val okHttpClient = OkHttpClient.Builder()
-        .addInterceptor(HttpLoggingInterceptor().apply {
-            level = HttpLoggingInterceptor.Level.BODY
-        })
-        .build()
-
-    private val retrofit = Retrofit.Builder()
-        .baseUrl(ItunesApiService.BASE_URL)
-        .client(okHttpClient)
-        .addConverterFactory(GsonConverterFactory.create())
-        .build()
-
-    private val itunesApiService = retrofit.create<ItunesApiService>()
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_search)
