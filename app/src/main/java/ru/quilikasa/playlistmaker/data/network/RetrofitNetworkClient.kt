@@ -8,12 +8,13 @@ import retrofit2.create
 import ru.quilikasa.playlistmaker.data.NetworkClient
 import ru.quilikasa.playlistmaker.data.dto.Response
 import ru.quilikasa.playlistmaker.data.dto.SearchSongsRequest
+import ru.quilikasa.playlistmaker.BuildConfig
 
 class RetrofitNetworkClient : NetworkClient {
 
     private val okHttpClient = OkHttpClient.Builder()
         .addInterceptor(HttpLoggingInterceptor().apply {
-            level = HttpLoggingInterceptor.Level.BODY
+            level = if (BuildConfig.DEBUG) HttpLoggingInterceptor.Level.BODY else HttpLoggingInterceptor.Level.NONE
         })
         .build()
 
