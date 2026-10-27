@@ -25,6 +25,17 @@ class PrefStorageClient<T>(context: Context, prefsName: String, private val type
         return list
     }
 
+    override fun addItem(item: T, key: String) {
+        val json = gson.toJson(item, type)
+        prefs.edit().putString(key, json).apply()
+    }
+
+    override fun getItem(key: String, default: T): T {
+        val json = prefs.getString(key, "")
+        if (json?.length == 0) return default
+        return gson.fromJson(json, type)
+    }
+
     override fun clear(key: String) {
         prefs.edit().putString(key, "").apply()
     }
