@@ -21,7 +21,6 @@ class PrefStorageClient<T>(context: Context, prefsName: String, private val type
         val json = prefs.getString(key, "")
         if (json?.length == 0) return listOf()
         val list: MutableList<T> = gson.fromJson(json, type)
-        list.reverse()
         return list
     }
 

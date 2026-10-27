@@ -7,7 +7,7 @@ import ru.quilikasa.playlistmaker.domain.models.Track
 class HistoryInteractorImpl(private val repository: HistoryRepository) : HistoryInteractor {
 
     override fun addTrack(newTrack: Track) {
-        repository.addTrack(newTrack)
+        repository.addTrack(newTrack.apply { viewDate = System.currentTimeMillis() })
     }
 
     override fun getTracks(): List<Track> {

@@ -14,7 +14,7 @@ class SongsRepositoryImpl(private val networkClient: NetworkClient) : SongsRepos
                 Track(it.trackName, it.artistName, it.trackTimeMillis, it.artworkUrl100,
                     it.getCoverArtwork(), it.trackId, it.collectionName,
                     it.releaseDate, it.extractYearFromIsoDate(), it.primaryGenreName,
-                    it.country, it.previewUrl) }
+                    it.country, it.previewUrl, 0) }
         } else {
             return emptyList()
         }

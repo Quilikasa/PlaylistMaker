@@ -10,15 +10,17 @@ class HistoryRepositoryImpl(private val storageClient: StorageClient<TrackDbDto>
     override fun addTrack(newTrack: Track) {
         val track = TrackDbDto(newTrack.trackName, newTrack.artistName, newTrack.trackTimeMillis,
             newTrack.artworkUrl100, newTrack.artworkUrl500, newTrack.trackId, newTrack.collectionName,
-            newTrack.releaseDate, newTrack.releaseYear, newTrack.primaryGenreName, newTrack.country, newTrack.previewUrl)
+            newTrack.releaseDate, newTrack.releaseYear, newTrack.primaryGenreName, newTrack.country,
+            newTrack.previewUrl, newTrack.viewDate)
         val list = storageClient.getItemList(HISTORY_PREFERENCE_KEY).toMutableList()
 
         if(list.contains(track)) {
             list.remove(track)
         }
         list.add(track)
+        list.sortByDescending { it.viewDate }
         if(list.size > MAX_HISTORY_SIZE) {
-            list.removeAt(0)
+            list.removeAt(list.lastIndex)
         }
 
         storageClient.addItemList(list, HISTORY_PREFERENCE_KEY)
@@ -27,7 +29,7 @@ class HistoryRepositoryImpl(private val storageClient: StorageClient<TrackDbDto>
     override fun getTracks(): List<Track> {
         return storageClient.getItemList(HISTORY_PREFERENCE_KEY).map { Track(it.trackName, it.artistName,
             it.trackTimeMillis, it.artworkUrl100, it.artworkUrl500, it.trackId, it.collectionName,
-            it.releaseDate, it.releaseYear, it.primaryGenreName, it.country, it.previewUrl) }
+            it.releaseDate, it.releaseYear, it.primaryGenreName, it.country, it.previewUrl, it.viewDate) }
     }
 
     override fun clearTracks() {

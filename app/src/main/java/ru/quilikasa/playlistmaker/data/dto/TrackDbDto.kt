@@ -12,4 +12,5 @@ data class TrackDbDto(val trackName: String,
                       val primaryGenreName: String,
                       val country: String,
                       val previewUrl: String,
+                      val viewDate: Long,
     )
