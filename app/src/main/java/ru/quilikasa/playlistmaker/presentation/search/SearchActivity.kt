@@ -22,6 +22,7 @@ import ru.quilikasa.playlistmaker.presentation.player.AudioplayerActivity
 import ru.quilikasa.playlistmaker.R
 import ru.quilikasa.playlistmaker.domain.api.HistoryInteractor
 import ru.quilikasa.playlistmaker.domain.api.SongsInteractor
+import ru.quilikasa.playlistmaker.domain.models.SearchSongsResult
 import ru.quilikasa.playlistmaker.domain.models.Track
 
 class SearchActivity : AppCompatActivity() {
@@ -147,13 +148,12 @@ class SearchActivity : AppCompatActivity() {
     }
 
     val songsConsumer = object : SongsInteractor.SongsConsumer {
-        override fun consume(foundSongs: List<Track>) {
-            if(foundSongs.isEmpty()) {
-                handler.post { showPlaceholder(false) }
-            } else {
-                handler.post { showSearchList(foundSongs) }
+        override fun consume(result: SearchSongsResult) {
+            when(result) {
+                is SearchSongsResult.Success -> handler.post { showSearchList(result.tracks) }
+                is SearchSongsResult.Error -> handler.post { showPlaceholder(true) }
+                is SearchSongsResult.Empty -> handler.post { showPlaceholder(false) }
             }
-            //TODO вернуть обработку ошибок позже
         }
     }
 

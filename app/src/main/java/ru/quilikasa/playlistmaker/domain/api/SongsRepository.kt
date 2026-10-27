@@ -1,7 +1,7 @@
 package ru.quilikasa.playlistmaker.domain.api
 
-import ru.quilikasa.playlistmaker.domain.models.Track
+import ru.quilikasa.playlistmaker.domain.models.SearchSongsResult
 
 interface SongsRepository {
-    fun searchSongs(trackName: String) : List<Track>
+    fun searchSongs(trackName: String): SearchSongsResult
 }
