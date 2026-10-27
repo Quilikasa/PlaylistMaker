@@ -15,9 +15,6 @@ import ru.quilikasa.playlistmaker.R
 import ru.quilikasa.playlistmaker.presentation.search.SearchActivity.Companion.KEY_TRACK_EXTRA
 import ru.quilikasa.playlistmaker.domain.models.Track
 import java.text.SimpleDateFormat
-import java.time.Instant
-import java.time.Year
-import java.time.ZoneOffset
 import java.util.Locale
 
 class AudioplayerActivity : AppCompatActivity() {
@@ -78,7 +75,7 @@ class AudioplayerActivity : AppCompatActivity() {
         textAlbumBottom.text = track?.collectionName
 
         val textYear = findViewById<TextView>(R.id.text_year)
-        textYear.text = extractYearFromIsoDate(track?.releaseDate)
+        textYear.text = track?.releaseYear
 
         val textGenre = findViewById<TextView>(R.id.text_genre)
         textGenre.text = track?.primaryGenreName
@@ -132,12 +129,6 @@ class AudioplayerActivity : AppCompatActivity() {
             TypedValue.COMPLEX_UNIT_DIP,
             dp,
             context.resources.displayMetrics).toInt()
-    }
-
-    //TODO перенести в репозиторий
-    private fun extractYearFromIsoDate(dateString: String?): String {
-        val instant = Instant.parse(dateString)
-        return Year.from(instant.atOffset(ZoneOffset.UTC)).value.toString()
     }
 
     override fun onPause() {

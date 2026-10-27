@@ -17,12 +17,10 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
-import com.google.gson.Gson
-import ru.quilikasa.playlistmaker.App.Companion.PLAYLIST_PREFERENCES
 import ru.quilikasa.playlistmaker.Creator
 import ru.quilikasa.playlistmaker.presentation.player.AudioplayerActivity
 import ru.quilikasa.playlistmaker.R
-import ru.quilikasa.playlistmaker.data.storage.SearchHistoryStorage
+import ru.quilikasa.playlistmaker.domain.api.HistoryInteractor
 import ru.quilikasa.playlistmaker.domain.api.SongsInteractor
 import ru.quilikasa.playlistmaker.domain.models.Track
 
@@ -42,9 +40,8 @@ class SearchActivity : AppCompatActivity() {
     private lateinit var tracksAdapter: TrackAdapter
     private lateinit var historyAdapter: TrackAdapter
 
-    private val interactor: SongsInteractor = Creator.provideSongsInteractor()
-
-    private lateinit var historyStorage: SearchHistoryStorage
+    private val songsInteractor: SongsInteractor = Creator.provideSongsInteractor()
+    private lateinit var historyInteractor: HistoryInteractor
 
     private val handler = Handler(Looper.getMainLooper())
     private val searchRunnable = Runnable {
@@ -71,15 +68,12 @@ class SearchActivity : AppCompatActivity() {
         val searchHistoryList = findViewById<RecyclerView>(R.id.historyRecyclerView)
         val historyClearButton = findViewById<Button>(R.id.history_clear_btn)
 
-        historyStorage = SearchHistoryStorage(
-            getSharedPreferences(PLAYLIST_PREFERENCES, MODE_PRIVATE), Gson()
-        )
+        historyInteractor = Creator.provideHistoryInteractor(this)
 
         tracksAdapter = TrackAdapter(
             onItemClick = { track ->
                 if (clickDebounce()) {
-                    //TODO переделать на интерактор
-                    historyStorage.addTrack(track)
+                    historyInteractor.addTrack(track)
                     openPlayer(track)
                 }
             } )
@@ -96,8 +90,7 @@ class SearchActivity : AppCompatActivity() {
         showHistoryList()
 
         historyClearButton.setOnClickListener {
-            //TODO переделать на интерактор
-            historyStorage.clearTracks()
+            historyInteractor.clearTracks()
             showEmptyScreen()
         }
 
@@ -180,7 +173,7 @@ class SearchActivity : AppCompatActivity() {
 
     private fun searchRequest() {
         Log.d("SearchActivity", "Start searchRequest with text = $searchText")
-        interactor.searchSongs(searchText, songsConsumer)
+        songsInteractor.searchSongs(searchText, songsConsumer)
     }
 
     private fun showProgress() {
@@ -201,8 +194,7 @@ class SearchActivity : AppCompatActivity() {
     }
 
     private fun showHistoryList() {
-        //TODO переделать на интерактор
-        val historyTracks = historyStorage.getTracks()
+        val historyTracks = historyInteractor.getTracks()
         if (historyTracks.size > 0) {
             historyAdapter.setTracks(historyTracks)
             historyAdapter.notifyDataSetChanged()
