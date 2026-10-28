@@ -1,4 +1,4 @@
-package ru.quilikasa.playlistmaker
+package ru.quilikasa.playlistmaker.presentation.player
 
 import android.content.Context
 import android.media.MediaPlayer
@@ -11,10 +11,10 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
-import ru.quilikasa.playlistmaker.SearchActivity.Companion.KEY_TRACK_EXTRA
+import ru.quilikasa.playlistmaker.R
+import ru.quilikasa.playlistmaker.presentation.search.SearchActivity.Companion.KEY_TRACK_EXTRA
+import ru.quilikasa.playlistmaker.domain.models.Track
 import java.text.SimpleDateFormat
-import java.time.Instant
-import java.time.Year
 import java.util.Locale
 
 class AudioplayerActivity : AppCompatActivity() {
@@ -49,7 +49,7 @@ class AudioplayerActivity : AppCompatActivity() {
 
         val imgAlbum = findViewById<ImageView>(R.id.img_album)
         Glide.with(this)
-            .load(track?.getCoverArtwork())
+            .load(track?.artworkUrl500)
             .placeholder(R.drawable.album)
             .centerCrop()
             .transform(RoundedCorners(dpToPx(8.0f, this)))
@@ -75,7 +75,7 @@ class AudioplayerActivity : AppCompatActivity() {
         textAlbumBottom.text = track?.collectionName
 
         val textYear = findViewById<TextView>(R.id.text_year)
-        textYear.text = extractYearFromIsoDate(track?.releaseDate)
+        textYear.text = track?.releaseYear
 
         val textGenre = findViewById<TextView>(R.id.text_genre)
         textGenre.text = track?.primaryGenreName
@@ -129,11 +129,6 @@ class AudioplayerActivity : AppCompatActivity() {
             TypedValue.COMPLEX_UNIT_DIP,
             dp,
             context.resources.displayMetrics).toInt()
-    }
-
-    private fun extractYearFromIsoDate(dateString: String?): String {
-        val instant = Instant.parse(dateString)
-        return Year.from(instant.atOffset(java.time.ZoneOffset.UTC)).value.toString()
     }
 
     override fun onPause() {

@@ -1,4 +1,4 @@
-package ru.quilikasa.playlistmaker
+package ru.quilikasa.playlistmaker.presentation.search
 
 import android.content.Intent
 import android.os.Bundle
@@ -17,14 +17,13 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
-import com.google.gson.Gson
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.create
-import ru.quilikasa.playlistmaker.App.Companion.PLAYLIST_PREFERENCES
+import ru.quilikasa.playlistmaker.Creator
+import ru.quilikasa.playlistmaker.presentation.player.AudioplayerActivity
+import ru.quilikasa.playlistmaker.R
+import ru.quilikasa.playlistmaker.domain.api.HistoryInteractor
+import ru.quilikasa.playlistmaker.domain.api.SongsInteractor
+import ru.quilikasa.playlistmaker.domain.models.SearchSongsResult
+import ru.quilikasa.playlistmaker.domain.models.Track
 
 class SearchActivity : AppCompatActivity() {
 
@@ -42,7 +41,8 @@ class SearchActivity : AppCompatActivity() {
     private lateinit var tracksAdapter: TrackAdapter
     private lateinit var historyAdapter: TrackAdapter
 
-    private lateinit var historyStorage: SearchHistoryStorage
+    private val songsInteractor: SongsInteractor = Creator.provideSongsInteractor()
+    private lateinit var historyInteractor: HistoryInteractor
 
     private val handler = Handler(Looper.getMainLooper())
     private val searchRunnable = Runnable {
@@ -51,13 +51,6 @@ class SearchActivity : AppCompatActivity() {
     }
 
     private var isClickAllowed = true
-
-    private val retrofit = Retrofit.Builder()
-        .baseUrl(ItunesApiService.BASE_URL)
-        .addConverterFactory(GsonConverterFactory.create())
-        .build()
-
-    private val itunesApiService = retrofit.create<ItunesApiService>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -76,13 +69,12 @@ class SearchActivity : AppCompatActivity() {
         val searchHistoryList = findViewById<RecyclerView>(R.id.historyRecyclerView)
         val historyClearButton = findViewById<Button>(R.id.history_clear_btn)
 
-        historyStorage = SearchHistoryStorage(
-            getSharedPreferences(PLAYLIST_PREFERENCES, MODE_PRIVATE), Gson())
+        historyInteractor = Creator.provideHistoryInteractor(this)
 
         tracksAdapter = TrackAdapter(
             onItemClick = { track ->
                 if (clickDebounce()) {
-                    historyStorage.addTrack(track)
+                    historyInteractor.addTrack(track)
                     openPlayer(track)
                 }
             } )
@@ -99,7 +91,7 @@ class SearchActivity : AppCompatActivity() {
         showHistoryList()
 
         historyClearButton.setOnClickListener {
-            historyStorage.clearTracks()
+            historyInteractor.clearTracks()
             showEmptyScreen()
         }
 
@@ -155,25 +147,13 @@ class SearchActivity : AppCompatActivity() {
         startActivity(intent)
     }
 
-    val retrofitCallback = object : Callback<SearchResult>{
-        override fun onResponse(
-            call: Call<SearchResult?>,
-            response: Response<SearchResult?>
-        ) {
-            if (response.code() == 200) {
-                if (response.body()?.results?.isNotEmpty() == true) {
-                    showSearchList(response.body()?.results!!)
-                }
-                if (response.body()?.results!!.isEmpty()) {
-                    showPlaceholder(false)
-                }
-            } else {
-                showPlaceholder(true)
+    val songsConsumer = object : SongsInteractor.SongsConsumer {
+        override fun consume(result: SearchSongsResult) {
+            when(result) {
+                is SearchSongsResult.Success -> handler.post { showSearchList(result.tracks) }
+                is SearchSongsResult.Error -> handler.post { showPlaceholder(true) }
+                is SearchSongsResult.Empty -> handler.post { showPlaceholder(false) }
             }
-        }
-
-        override fun onFailure(call: Call<SearchResult?>, t: Throwable) {
-            showPlaceholder(true)
         }
     }
 
@@ -193,7 +173,7 @@ class SearchActivity : AppCompatActivity() {
 
     private fun searchRequest() {
         Log.d("SearchActivity", "Start searchRequest with text = $searchText")
-        itunesApiService.searchSongs(searchText).enqueue(retrofitCallback)
+        songsInteractor.searchSongs(searchText, songsConsumer)
     }
 
     private fun showProgress() {
@@ -214,7 +194,7 @@ class SearchActivity : AppCompatActivity() {
     }
 
     private fun showHistoryList() {
-        val historyTracks = historyStorage.getTracks()
+        val historyTracks = historyInteractor.getTracks()
         if (historyTracks.size > 0) {
             historyAdapter.setTracks(historyTracks)
             historyAdapter.notifyDataSetChanged()

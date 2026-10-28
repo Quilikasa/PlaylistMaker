@@ -2,20 +2,21 @@ package ru.quilikasa.playlistmaker
 
 import android.app.Application
 import androidx.appcompat.app.AppCompatDelegate
+import ru.quilikasa.playlistmaker.domain.api.SettingsInteractor
 
 class App : Application() {
+
+    private lateinit var interactor: SettingsInteractor
 
     override fun onCreate() {
         super.onCreate()
 
-        val sharedPrefs = getSharedPreferences(PLAYLIST_PREFERENCES, MODE_PRIVATE)
-        val darkTheme = sharedPrefs.getBoolean(THEME_PREFERENCE_KEY, false)
-        switchTheme(darkTheme)
+        interactor = Creator.provideSettingsInteractor(this)
+        switchTheme(interactor.isDarkTheme())
     }
 
     fun switchTheme(darkThemeEnabled: Boolean) {
-        val sharedPrefs = getSharedPreferences(PLAYLIST_PREFERENCES, MODE_PRIVATE)
-        sharedPrefs.edit().putBoolean(THEME_PREFERENCE_KEY, darkThemeEnabled).apply()
+        interactor.switchTheme(darkThemeEnabled)
 
         AppCompatDelegate.setDefaultNightMode(
             if (darkThemeEnabled) {
