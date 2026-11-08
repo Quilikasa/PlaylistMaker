@@ -6,7 +6,6 @@ import android.os.Handler
 import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
@@ -15,19 +14,16 @@ import android.widget.EditText
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
 import ru.quilikasa.playlistmaker.Creator
 import ru.quilikasa.playlistmaker.presentation.player.AudioplayerActivity
 import ru.quilikasa.playlistmaker.R
 import ru.quilikasa.playlistmaker.domain.api.HistoryInteractor
-import ru.quilikasa.playlistmaker.domain.api.SongsInteractor
-import ru.quilikasa.playlistmaker.domain.models.SearchSongsResult
 import ru.quilikasa.playlistmaker.domain.models.Track
 
 class SearchActivity : AppCompatActivity() {
-
-    private var searchText: String = ""
 
     private lateinit var editText: EditText
     private lateinit var placeholderLayout: ViewGroup
@@ -41,14 +37,10 @@ class SearchActivity : AppCompatActivity() {
     private lateinit var tracksAdapter: TrackAdapter
     private lateinit var historyAdapter: TrackAdapter
 
-    private val songsInteractor: SongsInteractor = Creator.provideSongsInteractor()
+    private val songsViewModel: SearchViewModel by viewModels()
     private lateinit var historyInteractor: HistoryInteractor
 
     private val handler = Handler(Looper.getMainLooper())
-    private val searchRunnable = Runnable {
-        showProgress()
-        searchRequest()
-    }
 
     private var isClickAllowed = true
 
@@ -69,6 +61,10 @@ class SearchActivity : AppCompatActivity() {
         val searchHistoryList = findViewById<RecyclerView>(R.id.historyRecyclerView)
         val historyClearButton = findViewById<Button>(R.id.history_clear_btn)
 
+        songsViewModel.observeState().observe(this) {
+            render(it)
+        }
+
         historyInteractor = Creator.provideHistoryInteractor(this)
 
         tracksAdapter = TrackAdapter(
@@ -88,8 +84,10 @@ class SearchActivity : AppCompatActivity() {
             }
         )
         searchHistoryList.adapter = historyAdapter
+        //TODO перейти на вью модель?
         showHistoryList()
 
+        //TODO перейти на вью модель?
         historyClearButton.setOnClickListener {
             historyInteractor.clearTracks()
             showEmptyScreen()
@@ -99,6 +97,7 @@ class SearchActivity : AppCompatActivity() {
             finish()
         }
 
+        //TODO перейти на вью модель?
         btnClear.setOnClickListener {
             editText.setText("")
             showHistoryList()
@@ -107,6 +106,7 @@ class SearchActivity : AppCompatActivity() {
             inputMethodManager?.hideSoftInputFromWindow(editText.windowToken, 0)
         }
 
+        //TODO перейти на вью модель?
         val textWatcher = object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {}
 
@@ -118,13 +118,13 @@ class SearchActivity : AppCompatActivity() {
                     btnClear.visibility = View.GONE
                 } else {
                     showEmptyScreen()
-                    searchText = s.toString()
                     btnClear.visibility = View.VISIBLE
-                    searchDebounce()
+                    songsViewModel.searchDebounce(s.toString())
                 }
             }
         }
 
+        //TODO перейти на вью модель?
         editText.addTextChangedListener(textWatcher)
         editText.setOnFocusChangeListener { view, hasFocus ->
             if (hasFocus && editText.text.isEmpty()) {
@@ -136,7 +136,7 @@ class SearchActivity : AppCompatActivity() {
 
         placeholderButton.setOnClickListener {
             if (clickDebounce()) {
-                searchRequest()
+                songsViewModel.searchDebounce("")
             }
         }
     }
@@ -145,21 +145,6 @@ class SearchActivity : AppCompatActivity() {
         val intent = Intent(this, AudioplayerActivity::class.java)
         intent.putExtra(KEY_TRACK_EXTRA, track)
         startActivity(intent)
-    }
-
-    val songsConsumer = object : SongsInteractor.SongsConsumer {
-        override fun consume(result: SearchSongsResult) {
-            when(result) {
-                is SearchSongsResult.Success -> handler.post { showSearchList(result.tracks) }
-                is SearchSongsResult.Error -> handler.post { showPlaceholder(true) }
-                is SearchSongsResult.Empty -> handler.post { showPlaceholder(false) }
-            }
-        }
-    }
-
-    private fun searchDebounce() {
-        handler.removeCallbacks(searchRunnable)
-        handler.postDelayed(searchRunnable, SEARCH_DEBOUNCE_DELAY)
     }
 
     private fun clickDebounce() : Boolean {
@@ -171,9 +156,14 @@ class SearchActivity : AppCompatActivity() {
         return current
     }
 
-    private fun searchRequest() {
-        Log.d("SearchActivity", "Start searchRequest with text = $searchText")
-        songsInteractor.searchSongs(searchText, songsConsumer)
+    fun render(state: SearchState) {
+        when (state) {
+            is SearchState.Loading -> showProgress()
+            is SearchState.Success -> showSearchList(state.tracks)
+            is SearchState.Error -> showPlaceholder(true)
+            is SearchState.EmptySearch -> showPlaceholder(false)
+            SearchState.EmptyScreen -> showEmptyScreen()
+        }
     }
 
     private fun showProgress() {
@@ -193,6 +183,7 @@ class SearchActivity : AppCompatActivity() {
         searchList.visibility = View.VISIBLE
     }
 
+    //TODO перейти на вью модель
     private fun showHistoryList() {
         val historyTracks = historyInteractor.getTracks()
         if (historyTracks.size > 0) {
@@ -231,20 +222,8 @@ class SearchActivity : AppCompatActivity() {
         searchList.visibility = View.GONE
     }
 
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        outState.putString(KEY_EDIT_TEXT, searchText)
-    }
-
-    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
-        super.onRestoreInstanceState(savedInstanceState)
-        searchText = savedInstanceState.getString(KEY_EDIT_TEXT).toString()
-        editText.setText(searchText)
-    }
-
     companion object {
-        private const val KEY_EDIT_TEXT = "EditText"
-        private const val SEARCH_DEBOUNCE_DELAY = 2000L
+        //TODO где должна обрабатываться задерка отправки запроса?
         private const val CLICK_DEBOUNCE_DELAY = 1000L
         const val KEY_TRACK_EXTRA = "TrackExtra"
     }
