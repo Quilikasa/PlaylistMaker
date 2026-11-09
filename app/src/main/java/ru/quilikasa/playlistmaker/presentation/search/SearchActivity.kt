@@ -14,18 +14,17 @@ import android.widget.EditText
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
-import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.RecyclerView
-import ru.quilikasa.playlistmaker.Creator
 import ru.quilikasa.playlistmaker.presentation.player.AudioplayerActivity
 import ru.quilikasa.playlistmaker.R
-import ru.quilikasa.playlistmaker.domain.api.HistoryInteractor
 import ru.quilikasa.playlistmaker.domain.models.Track
 
 class SearchActivity : AppCompatActivity() {
 
     private lateinit var editText: EditText
+    private lateinit var btnClear: ImageView
     private lateinit var placeholderLayout: ViewGroup
     private lateinit var placeholderImage: ImageView
     private lateinit var placeholderText: TextView
@@ -37,8 +36,7 @@ class SearchActivity : AppCompatActivity() {
     private lateinit var tracksAdapter: TrackAdapter
     private lateinit var historyAdapter: TrackAdapter
 
-    private val songsViewModel: SearchViewModel by viewModels()
-    private lateinit var historyInteractor: HistoryInteractor
+    private lateinit var songsViewModel: SearchViewModel
 
     private val handler = Handler(Looper.getMainLooper())
 
@@ -48,8 +46,13 @@ class SearchActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_search)
 
+        songsViewModel = ViewModelProvider(
+            this,
+            SearchViewModel.getFactory()
+        ).get(SearchViewModel::class.java)
+
         val btnBack = findViewById<ImageView>(R.id.btn_back)
-        val btnClear = findViewById<ImageView>(R.id.btn_clear)
+        btnClear = findViewById(R.id.btn_clear)
         editText = findViewById(R.id.edit)
         placeholderLayout = findViewById(R.id.placeholder)
         placeholderImage = findViewById(R.id.placeholder_img)
@@ -65,12 +68,10 @@ class SearchActivity : AppCompatActivity() {
             render(it)
         }
 
-        historyInteractor = Creator.provideHistoryInteractor(this)
-
         tracksAdapter = TrackAdapter(
             onItemClick = { track ->
                 if (clickDebounce()) {
-                    historyInteractor.addTrack(track)
+                    songsViewModel.addTrackToHistory(track)
                     openPlayer(track)
                 }
             } )
@@ -84,59 +85,48 @@ class SearchActivity : AppCompatActivity() {
             }
         )
         searchHistoryList.adapter = historyAdapter
-        //TODO перейти на вью модель?
-        showHistoryList()
 
-        //TODO перейти на вью модель?
         historyClearButton.setOnClickListener {
-            historyInteractor.clearTracks()
-            showEmptyScreen()
+            songsViewModel.clearHistory()
         }
 
         btnBack.setOnClickListener {
             finish()
         }
 
-        //TODO перейти на вью модель?
         btnClear.setOnClickListener {
             editText.setText("")
-            showHistoryList()
 
             val inputMethodManager = getSystemService(INPUT_METHOD_SERVICE) as? InputMethodManager
             inputMethodManager?.hideSoftInputFromWindow(editText.windowToken, 0)
         }
 
-        //TODO перейти на вью модель?
         val textWatcher = object : TextWatcher {
-            override fun afterTextChanged(s: Editable?) {}
+            override fun afterTextChanged(s: Editable?) {
+                btnClear.visibility = if (editText.text.isNullOrEmpty()) View.GONE else View.VISIBLE
+            }
 
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                if (editText.hasFocus() && s?.isEmpty() == true) {
-                    showHistoryList()
-                    btnClear.visibility = View.GONE
+                if (s.isNullOrEmpty()) {
+                    songsViewModel.clearSearch()
                 } else {
-                    showEmptyScreen()
-                    btnClear.visibility = View.VISIBLE
                     songsViewModel.searchDebounce(s.toString())
                 }
             }
         }
 
-        //TODO перейти на вью модель?
         editText.addTextChangedListener(textWatcher)
         editText.setOnFocusChangeListener { view, hasFocus ->
             if (hasFocus && editText.text.isEmpty()) {
-                showHistoryList()
-            } else {
-                showEmptyScreen()
+                songsViewModel.clearSearch()
             }
         }
 
         placeholderButton.setOnClickListener {
             if (clickDebounce()) {
-                songsViewModel.searchDebounce("")
+                songsViewModel.retrySearch()
             }
         }
     }
@@ -151,18 +141,19 @@ class SearchActivity : AppCompatActivity() {
         val current = isClickAllowed
         if (isClickAllowed) {
             isClickAllowed = false
-            handler.postDelayed({ isClickAllowed = true }, CLICK_DEBOUNCE_DELAY)
+            handler.postDelayed({ isClickAllowed = true }, CLICK_DEBOUNCE_TOKEN, CLICK_DEBOUNCE_DELAY)
         }
         return current
     }
 
-    fun render(state: SearchState) {
+    private fun render(state: SearchState) {
         when (state) {
             is SearchState.Loading -> showProgress()
             is SearchState.Success -> showSearchList(state.tracks)
             is SearchState.Error -> showPlaceholder(true)
             is SearchState.EmptySearch -> showPlaceholder(false)
-            SearchState.EmptyScreen -> showEmptyScreen()
+            is SearchState.EmptyScreen -> showEmptyScreen()
+            is SearchState.History -> showHistoryList((state.tracks))
         }
     }
 
@@ -183,20 +174,14 @@ class SearchActivity : AppCompatActivity() {
         searchList.visibility = View.VISIBLE
     }
 
-    //TODO перейти на вью модель
-    private fun showHistoryList() {
-        val historyTracks = historyInteractor.getTracks()
-        if (historyTracks.size > 0) {
-            historyAdapter.setTracks(historyTracks)
-            historyAdapter.notifyDataSetChanged()
+    private fun showHistoryList(tracks: List<Track>) {
+        historyAdapter.setTracks(tracks)
+        historyAdapter.notifyDataSetChanged()
 
-            progress.visibility = View.GONE
-            placeholderLayout.visibility = View.GONE
-            historyLayout.visibility = View.VISIBLE
-            searchList.visibility = View.GONE
-        } else {
-            showEmptyScreen()
-        }
+        progress.visibility = View.GONE
+        placeholderLayout.visibility = View.GONE
+        historyLayout.visibility = View.VISIBLE
+        searchList.visibility = View.GONE
     }
 
     private fun showPlaceholder(isFailure: Boolean) {
@@ -222,9 +207,14 @@ class SearchActivity : AppCompatActivity() {
         searchList.visibility = View.GONE
     }
 
+    override fun onDestroy() {
+        handler.removeCallbacksAndMessages(CLICK_DEBOUNCE_TOKEN)
+        super.onDestroy()
+    }
+
     companion object {
-        //TODO где должна обрабатываться задерка отправки запроса?
         private const val CLICK_DEBOUNCE_DELAY = 1000L
+        private val CLICK_DEBOUNCE_TOKEN = Any()
         const val KEY_TRACK_EXTRA = "TrackExtra"
     }
 }

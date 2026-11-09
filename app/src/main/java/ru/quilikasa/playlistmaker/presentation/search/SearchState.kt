@@ -8,4 +8,5 @@ sealed class SearchState {
     object EmptySearch : SearchState()
     object Loading : SearchState()
     object EmptyScreen : SearchState()
+    data class History(val tracks: List<Track>) : SearchState()
 }
