@@ -17,14 +17,12 @@ class AudioplayerViewModel(private val trackUrl: String) : ViewModel() {
     private val formatter = SimpleDateFormat("mm:ss", Locale.getDefault())
     private var mediaPlayer = MediaPlayer()
 
-    private val playerStateLiveData = MutableLiveData(STATE_DEFAULT)
-    fun observePlayerState(): LiveData<Int> = playerStateLiveData
-    private val progressTimeLiveData = MutableLiveData("00:00")
-    fun observeProgressTime(): LiveData<String> = progressTimeLiveData
+    private val uiStateLiveData = MutableLiveData(PlayerState())
+    fun observeUiState(): LiveData<PlayerState> = uiStateLiveData
 
     private val handler = Handler(Looper.getMainLooper())
     private val runnable: Runnable = Runnable {
-        progressTimeLiveData.postValue(formatter.format(mediaPlayer.currentPosition))
+        updateProgress(formatter.format(mediaPlayer.currentPosition))
         handler.postDelayed(runnable, 300)
     }
 
@@ -32,33 +30,44 @@ class AudioplayerViewModel(private val trackUrl: String) : ViewModel() {
         preparePlayer()
     }
 
+    private fun updateState(transform: (PlayerState) -> PlayerState) {
+        val current = uiStateLiveData.value ?: PlayerState()
+        uiStateLiveData.postValue(transform(current))
+    }
+
+    private fun updatePlayerState(state: Int) =
+        updateState { it.copy(playerState = state) }
+
+    private fun updateProgress(time: String) =
+        updateState { it.copy(progressTime = time) }
+
     private fun preparePlayer() {
         mediaPlayer.setDataSource(trackUrl)
         mediaPlayer.prepareAsync()
         mediaPlayer.setOnPreparedListener {
-            playerStateLiveData.postValue(STATE_PREPARED)
+            updatePlayerState(STATE_PREPARED)
         }
         mediaPlayer.setOnCompletionListener {
-            playerStateLiveData.postValue(STATE_PREPARED)
-            progressTimeLiveData.postValue("00:00")
+            updatePlayerState(STATE_PREPARED)
+            updateProgress("00:00")
             handler.removeCallbacks(runnable)
         }
     }
 
     private fun startPlayer() {
         mediaPlayer.start()
-        playerStateLiveData.postValue(STATE_PLAYING)
+        updatePlayerState(STATE_PLAYING)
         handler.postDelayed(runnable, 300)
     }
 
     fun pausePlayer() {
         mediaPlayer.pause()
-        playerStateLiveData.postValue(STATE_PAUSED)
+        updatePlayerState(STATE_PAUSED)
         handler.removeCallbacks(runnable)
     }
 
     fun playbackControl() {
-        when(playerStateLiveData.value) {
+        when(uiStateLiveData.value?.playerState) {
             STATE_PLAYING -> {
                 pausePlayer()
             }

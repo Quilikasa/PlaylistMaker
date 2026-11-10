@@ -72,17 +72,14 @@ class AudioplayerActivity : AppCompatActivity() {
             AudioplayerViewModel.getFactory(track.previewUrl)
         ).get(AudioplayerViewModel::class.java)
 
-        audioPlayerViewModel.observeProgressTime().observe(this) {
-            txtTime.text = it
-        }
-
-        audioPlayerViewModel.observePlayerState().observe(this) {
-            if(it == AudioplayerViewModel.STATE_PLAYING) {
-                btnPlay.setImageResource(R.drawable.button_pause)
-            } else {
-                btnPlay.setImageResource(R.drawable.button_play)
-            }
-            btnPlay.isEnabled = it != AudioplayerViewModel.STATE_DEFAULT
+        audioPlayerViewModel.observeUiState().observe(this) { state ->
+            btnPlay.setImageResource(
+                when (state.playerState) {
+                    AudioplayerViewModel.STATE_PLAYING -> R.drawable.button_pause
+                    else -> R.drawable.button_play
+                }
+            )
+            txtTime.text = state.progressTime
         }
     }
 
