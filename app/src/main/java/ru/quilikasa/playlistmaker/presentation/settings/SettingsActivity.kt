@@ -6,9 +6,8 @@ import android.widget.FrameLayout
 import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.net.toUri
+import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.switchmaterial.SwitchMaterial
-import ru.quilikasa.playlistmaker.App
-import ru.quilikasa.playlistmaker.Creator
 import ru.quilikasa.playlistmaker.R
 
 class SettingsActivity : AppCompatActivity() {
@@ -17,16 +16,19 @@ class SettingsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
 
+        val settingsViewModel = ViewModelProvider(
+            this,
+            SettingsViewModel.getFactory()
+        ).get(SettingsViewModel::class.java)
+
         val btnBack = findViewById<ImageView>(R.id.btn_back)
         btnBack.setOnClickListener {
             finish()
         }
 
         val themeSwitcher = findViewById<SwitchMaterial>(R.id.themeSwitcher)
-        val interactor = Creator.provideSettingsInteractor(this)
-        themeSwitcher.isChecked = interactor.isDarkTheme()
         themeSwitcher.setOnCheckedChangeListener { switcher, checked ->
-            (applicationContext as App).switchTheme(checked)
+            settingsViewModel.switchTheme(checked)
         }
 
         val btnShare = findViewById<FrameLayout>(R.id.btn_share)
@@ -51,6 +53,10 @@ class SettingsActivity : AppCompatActivity() {
         btnEula.setOnClickListener {
             val intent = Intent(Intent.ACTION_VIEW, getString(R.string.eula_link).toUri())
             startActivity(intent)
+        }
+
+        settingsViewModel.observeState().observe(this) {
+            themeSwitcher.isChecked = it
         }
     }
 }

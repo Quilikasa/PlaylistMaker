@@ -6,18 +6,14 @@ import ru.quilikasa.playlistmaker.domain.api.SettingsInteractor
 
 class App : Application() {
 
-    private lateinit var interactor: SettingsInteractor
-
     override fun onCreate() {
         super.onCreate()
 
-        interactor = Creator.provideSettingsInteractor(this)
-        switchTheme(interactor.isDarkTheme())
+        val settingsInteractor = Creator.provideSettingsInteractor(this)
+        setTheme(settingsInteractor.isDarkTheme())
     }
 
-    fun switchTheme(darkThemeEnabled: Boolean) {
-        interactor.switchTheme(darkThemeEnabled)
-
+    private fun setTheme(darkThemeEnabled: Boolean) {
         AppCompatDelegate.setDefaultNightMode(
             if (darkThemeEnabled) {
                 AppCompatDelegate.MODE_NIGHT_YES
