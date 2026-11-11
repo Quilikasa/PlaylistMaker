@@ -1,16 +1,13 @@
 package ru.quilikasa.playlistmaker.data.storage
 
-import android.content.Context
-import android.content.Context.MODE_PRIVATE
 import android.content.SharedPreferences
 import com.google.gson.Gson
 import ru.quilikasa.playlistmaker.data.StorageClient
 import java.lang.reflect.Type
 
-class PrefStorageClient<T>(context: Context, prefsName: String, private val type: Type) : StorageClient<T> {
-
-    private val prefs: SharedPreferences = context.getSharedPreferences(prefsName, MODE_PRIVATE)
-    private val gson: Gson = Gson()
+class PrefStorageClient<T>(private val prefs: SharedPreferences,
+                           private val gson: Gson,
+                           private val type: Type) : StorageClient<T> {
 
     override fun addItemList(list: List<T>, key: String) {
         val json = gson.toJson(list, type)

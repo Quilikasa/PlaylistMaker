@@ -6,8 +6,8 @@ import android.widget.FrameLayout
 import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.net.toUri
-import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.switchmaterial.SwitchMaterial
+import org.koin.androidx.viewmodel.ext.android.viewModel
 import ru.quilikasa.playlistmaker.R
 
 class SettingsActivity : AppCompatActivity() {
@@ -16,10 +16,7 @@ class SettingsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
 
-        val settingsViewModel = ViewModelProvider(
-            this,
-            SettingsViewModel.getFactory()
-        ).get(SettingsViewModel::class.java)
+        val settingsViewModel by viewModel<SettingsViewModel>()
 
         val btnBack = findViewById<ImageView>(R.id.btn_back)
         btnBack.setOnClickListener {

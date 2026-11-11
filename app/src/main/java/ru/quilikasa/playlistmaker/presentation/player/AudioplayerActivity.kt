@@ -6,9 +6,10 @@ import android.util.TypedValue
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
+import org.koin.androidx.viewmodel.ext.android.getViewModel
+import org.koin.core.parameter.parametersOf
 import ru.quilikasa.playlistmaker.R
 import ru.quilikasa.playlistmaker.presentation.search.SearchActivity.Companion.KEY_TRACK_EXTRA
 import ru.quilikasa.playlistmaker.domain.models.Track
@@ -25,6 +26,10 @@ class AudioplayerActivity : AppCompatActivity() {
         setContentView(R.layout.activity_audioplayer)
 
         val track = intent.getSerializableExtra(KEY_TRACK_EXTRA) as Track
+
+        audioPlayerViewModel = getViewModel {
+            parametersOf(track.previewUrl)
+        }
 
         val btnBack = findViewById<ImageView>(R.id.btn_back)
         btnBack.setOnClickListener {
@@ -66,11 +71,6 @@ class AudioplayerActivity : AppCompatActivity() {
 
         val textCountry = findViewById<TextView>(R.id.text_country)
         textCountry.text = track.country
-
-        audioPlayerViewModel = ViewModelProvider(
-            this,
-            AudioplayerViewModel.getFactory(track.previewUrl)
-        ).get(AudioplayerViewModel::class.java)
 
         audioPlayerViewModel.observeUiState().observe(this) { state ->
             btnPlay.setImageResource(
