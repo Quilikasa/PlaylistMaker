@@ -6,16 +6,13 @@ import android.os.Looper
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
 import java.text.SimpleDateFormat
 import java.util.Locale
 
-class AudioplayerViewModel(private val trackUrl: String) : ViewModel() {
+class AudioplayerViewModel(private val trackUrl: String,
+                           private val mediaPlayer: MediaPlayer) : ViewModel() {
 
     private val formatter = SimpleDateFormat("mm:ss", Locale.getDefault())
-    private var mediaPlayer = MediaPlayer()
 
     private val uiStateLiveData = MutableLiveData(PlayerState())
     fun observeUiState(): LiveData<PlayerState> = uiStateLiveData
@@ -88,11 +85,5 @@ class AudioplayerViewModel(private val trackUrl: String) : ViewModel() {
         const val STATE_PREPARED = 1
         const val STATE_PLAYING = 2
         const val STATE_PAUSED = 3
-
-        fun getFactory(trackUrl: String): ViewModelProvider.Factory = viewModelFactory {
-            initializer {
-                AudioplayerViewModel(trackUrl)
-            }
-        }
     }
 }
