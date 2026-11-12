@@ -15,8 +15,8 @@ import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.RecyclerView
+import org.koin.androidx.viewmodel.ext.android.viewModel
 import ru.quilikasa.playlistmaker.presentation.player.AudioplayerActivity
 import ru.quilikasa.playlistmaker.R
 import ru.quilikasa.playlistmaker.domain.models.Track
@@ -35,8 +35,7 @@ class SearchActivity : AppCompatActivity() {
 
     private lateinit var tracksAdapter: TrackAdapter
     private lateinit var historyAdapter: TrackAdapter
-
-    private lateinit var songsViewModel: SearchViewModel
+    private val songsViewModel by viewModel<SearchViewModel>()
 
     private val handler = Handler(Looper.getMainLooper())
 
@@ -45,11 +44,6 @@ class SearchActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_search)
-
-        songsViewModel = ViewModelProvider(
-            this,
-            SearchViewModel.getFactory()
-        ).get(SearchViewModel::class.java)
 
         val btnBack = findViewById<ImageView>(R.id.btn_back)
         btnClear = findViewById(R.id.btn_clear)

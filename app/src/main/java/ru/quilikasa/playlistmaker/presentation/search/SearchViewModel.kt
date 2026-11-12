@@ -1,41 +1,25 @@
 package ru.quilikasa.playlistmaker.presentation.search
 
-import android.app.Application
-import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
-import ru.quilikasa.playlistmaker.Creator
 import ru.quilikasa.playlistmaker.domain.api.HistoryInteractor
 import ru.quilikasa.playlistmaker.domain.api.SongsInteractor
 import ru.quilikasa.playlistmaker.domain.models.SearchSongsResult
 import ru.quilikasa.playlistmaker.domain.models.Track
 
-class SearchViewModel(private val context: Context) : ViewModel() {
+class SearchViewModel(private val songsInteractor: SongsInteractor,
+                      private val historyInteractor: HistoryInteractor) : ViewModel() {
 
     companion object {
         private const val SEARCH_DEBOUNCE_DELAY = 2000L
-
-        fun getFactory(): ViewModelProvider.Factory = viewModelFactory {
-            initializer {
-                val app = (this[APPLICATION_KEY] as Application)
-                SearchViewModel(app)
-            }
-        }
     }
 
     private val stateLiveData = MutableLiveData<SearchState>()
     fun observeState(): LiveData<SearchState> = stateLiveData
-
-    private val songsInteractor: SongsInteractor = Creator.provideSongsInteractor()
-    private val historyInteractor: HistoryInteractor = Creator.provideHistoryInteractor(context)
 
     private var searchText: String = ""
 
