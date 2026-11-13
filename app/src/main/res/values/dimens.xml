@@ -11,4 +11,6 @@
     <dimen name="med_text_size">16sp</dimen>
 
     <dimen name="small_text_size">11sp</dimen>
+
+    <dimen name="placeholder_text_size">19sp</dimen>
 </resources>
