@@ -11,8 +11,8 @@ import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import org.koin.androidx.viewmodel.ext.android.getViewModel
 import org.koin.core.parameter.parametersOf
 import ru.quilikasa.playlistmaker.R
-import ru.quilikasa.playlistmaker.presentation.search.SearchActivity.Companion.KEY_TRACK_EXTRA
 import ru.quilikasa.playlistmaker.domain.models.Track
+import ru.quilikasa.playlistmaker.presentation.search.SearchFragment.Companion.KEY_TRACK_EXTRA
 import java.text.SimpleDateFormat
 import java.util.Locale
 

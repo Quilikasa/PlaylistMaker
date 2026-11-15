@@ -1,11 +1,13 @@
 package ru.quilikasa.playlistmaker.presentation.search
 
+import android.content.Context.INPUT_METHOD_SERVICE
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
+import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
@@ -14,14 +16,14 @@ import android.widget.EditText
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
-import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
 import org.koin.androidx.viewmodel.ext.android.viewModel
-import ru.quilikasa.playlistmaker.presentation.player.AudioplayerActivity
 import ru.quilikasa.playlistmaker.R
 import ru.quilikasa.playlistmaker.domain.models.Track
+import ru.quilikasa.playlistmaker.presentation.player.AudioplayerActivity
 
-class SearchActivity : AppCompatActivity() {
+class SearchFragment : Fragment()  {
 
     private lateinit var editText: EditText
     private lateinit var btnClear: ImageView
@@ -41,24 +43,30 @@ class SearchActivity : AppCompatActivity() {
 
     private var isClickAllowed = true
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_search)
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        return inflater.inflate(R.layout.fragment_search, container, false)
+    }
 
-        val btnBack = findViewById<ImageView>(R.id.btn_back)
-        btnClear = findViewById(R.id.btn_clear)
-        editText = findViewById(R.id.edit)
-        placeholderLayout = findViewById(R.id.placeholder)
-        placeholderImage = findViewById(R.id.placeholder_img)
-        placeholderText = findViewById(R.id.placeholder_txt)
-        placeholderButton = findViewById(R.id.placeholder_btn)
-        progress = findViewById(R.id.progress)
-        searchList = findViewById(R.id.recyclerView)
-        historyLayout = findViewById(R.id.history)
-        val searchHistoryList = findViewById<RecyclerView>(R.id.historyRecyclerView)
-        val historyClearButton = findViewById<Button>(R.id.history_clear_btn)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
-        songsViewModel.observeState().observe(this) {
+        btnClear = view.findViewById(R.id.btn_clear)
+        editText = view.findViewById(R.id.edit)
+        placeholderLayout = view.findViewById(R.id.placeholder)
+        placeholderImage = view.findViewById(R.id.placeholder_img)
+        placeholderText = view.findViewById(R.id.placeholder_txt)
+        placeholderButton = view.findViewById(R.id.placeholder_btn)
+        progress = view.findViewById(R.id.progress)
+        searchList = view.findViewById(R.id.recyclerView)
+        historyLayout = view.findViewById(R.id.history)
+        val searchHistoryList = view.findViewById<RecyclerView>(R.id.historyRecyclerView)
+        val historyClearButton = view.findViewById<Button>(R.id.history_clear_btn)
+
+        songsViewModel.observeState().observe(getViewLifecycleOwner()) {
             render(it)
         }
 
@@ -84,14 +92,10 @@ class SearchActivity : AppCompatActivity() {
             songsViewModel.clearHistory()
         }
 
-        btnBack.setOnClickListener {
-            finish()
-        }
-
         btnClear.setOnClickListener {
             editText.setText("")
 
-            val inputMethodManager = getSystemService(INPUT_METHOD_SERVICE) as? InputMethodManager
+            val inputMethodManager = requireContext().getSystemService(INPUT_METHOD_SERVICE) as? InputMethodManager
             inputMethodManager?.hideSoftInputFromWindow(editText.windowToken, 0)
         }
 
@@ -126,7 +130,7 @@ class SearchActivity : AppCompatActivity() {
     }
 
     private fun openPlayer(track: Track) {
-        val intent = Intent(this, AudioplayerActivity::class.java)
+        val intent = Intent(requireContext(), AudioplayerActivity::class.java)
         intent.putExtra(KEY_TRACK_EXTRA, track)
         startActivity(intent)
     }
@@ -201,9 +205,10 @@ class SearchActivity : AppCompatActivity() {
         searchList.visibility = View.GONE
     }
 
-    override fun onDestroy() {
+    override fun onDestroyView() {
+        //TODO или onDestroy?
         handler.removeCallbacksAndMessages(CLICK_DEBOUNCE_TOKEN)
-        super.onDestroy()
+        super.onDestroyView()
     }
 
     companion object {
