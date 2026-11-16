@@ -5,18 +5,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="ru.quilikasa.playlistmaker.presentation.library.LibraryFragment"
-    android:fitsSystemWindows="true">
+    tools:context="ru.quilikasa.playlistmaker.presentation.library.LibraryFragment">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:padding="16dp">
-
-        <ImageView
-            android:id="@+id/btn_back"
-            style="@style/TopBarIconBack" />
 
         <TextView
             style="@style/TopBarText"
