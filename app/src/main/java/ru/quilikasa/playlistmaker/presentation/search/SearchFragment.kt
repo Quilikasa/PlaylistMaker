@@ -1,7 +1,6 @@
 package ru.quilikasa.playlistmaker.presentation.search
 
 import android.content.Context.INPUT_METHOD_SERVICE
-import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -17,11 +16,12 @@ import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import ru.quilikasa.playlistmaker.R
 import ru.quilikasa.playlistmaker.domain.models.Track
-import ru.quilikasa.playlistmaker.presentation.player.AudioplayerActivity
+import ru.quilikasa.playlistmaker.presentation.player.AudioplayerFragment
 
 class SearchFragment : Fragment()  {
 
@@ -130,9 +130,8 @@ class SearchFragment : Fragment()  {
     }
 
     private fun openPlayer(track: Track) {
-        val intent = Intent(requireContext(), AudioplayerActivity::class.java)
-        intent.putExtra(KEY_TRACK_EXTRA, track)
-        startActivity(intent)
+        findNavController().navigate(R.id.action_searchFragment_to_audioplayerFragment,
+            AudioplayerFragment.createArgs(track))
     }
 
     private fun clickDebounce() : Boolean {
@@ -205,15 +204,13 @@ class SearchFragment : Fragment()  {
         searchList.visibility = View.GONE
     }
 
-    override fun onDestroyView() {
-        //TODO или onDestroy?
+    override fun onDestroy() {
         handler.removeCallbacksAndMessages(CLICK_DEBOUNCE_TOKEN)
-        super.onDestroyView()
+        super.onDestroy()
     }
 
     companion object {
         private const val CLICK_DEBOUNCE_DELAY = 1000L
         private val CLICK_DEBOUNCE_TOKEN = Any()
-        const val KEY_TRACK_EXTRA = "TrackExtra"
     }
 }
