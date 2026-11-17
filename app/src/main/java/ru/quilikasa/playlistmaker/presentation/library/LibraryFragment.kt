@@ -28,7 +28,7 @@ class LibraryFragment : Fragment() {
         val viewPager = view.findViewById<ViewPager2>(R.id.libraryViewPager)
         val tabLayout = view.findViewById<TabLayout>(R.id.libraryTabLayout)
 
-        viewPager.adapter = LibraryPagerAdapter(childFragmentManager, lifecycle)
+        viewPager.adapter = LibraryPagerAdapter(childFragmentManager, viewLifecycleOwner.lifecycle)
 
         tabMediator = TabLayoutMediator(tabLayout, viewPager) { tab, position ->
             when(position) {

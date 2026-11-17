@@ -8,6 +8,7 @@
         <item name="colorOnPrimary">@color/gray</item>
         <item name="colorOnSecondary">@color/gray</item>
         <item name="android:windowBackground">@color/white</item>
+        <item name="bottomNavigationStyle">@style/CustomBottomNavStyle</item>
     </style>
 
     <style name="Theme.PlaylistMaker" parent="Base.Theme.PlaylistMaker" />
