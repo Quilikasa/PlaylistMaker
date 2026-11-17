@@ -2,33 +2,37 @@ package ru.quilikasa.playlistmaker.presentation.settings
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import android.widget.FrameLayout
-import android.widget.ImageView
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.net.toUri
+import androidx.fragment.app.Fragment
 import com.google.android.material.switchmaterial.SwitchMaterial
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import ru.quilikasa.playlistmaker.R
 
-class SettingsActivity : AppCompatActivity() {
+class SettingsFragment : Fragment() {
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_settings)
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        return inflater.inflate(R.layout.fragment_settings, container, false)
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         val settingsViewModel by viewModel<SettingsViewModel>()
 
-        val btnBack = findViewById<ImageView>(R.id.btn_back)
-        btnBack.setOnClickListener {
-            finish()
-        }
-
-        val themeSwitcher = findViewById<SwitchMaterial>(R.id.themeSwitcher)
+        val themeSwitcher = view.findViewById<SwitchMaterial>(R.id.themeSwitcher)
         themeSwitcher.setOnCheckedChangeListener { switcher, checked ->
             settingsViewModel.switchTheme(checked)
         }
 
-        val btnShare = findViewById<FrameLayout>(R.id.btn_share)
+        val btnShare = view.findViewById<FrameLayout>(R.id.btn_share)
         btnShare.setOnClickListener {
             val intent = Intent(Intent.ACTION_SEND)
             intent.type = "text/plain"
@@ -36,7 +40,7 @@ class SettingsActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
-        val btnSupport = findViewById<FrameLayout>(R.id.btn_support)
+        val btnSupport = view.findViewById<FrameLayout>(R.id.btn_support)
         btnSupport.setOnClickListener {
             val intent = Intent(Intent.ACTION_SENDTO)
             intent.data = "mailto:".toUri()
@@ -46,13 +50,13 @@ class SettingsActivity : AppCompatActivity() {
             startActivity(intent);
         }
 
-        val btnEula = findViewById<FrameLayout>(R.id.btn_eula)
+        val btnEula = view.findViewById<FrameLayout>(R.id.btn_eula)
         btnEula.setOnClickListener {
             val intent = Intent(Intent.ACTION_VIEW, getString(R.string.eula_link).toUri())
             startActivity(intent)
         }
 
-        settingsViewModel.observeState().observe(this) {
+        settingsViewModel.observeState().observe(getViewLifecycleOwner()) {
             themeSwitcher.isChecked = it
         }
     }
